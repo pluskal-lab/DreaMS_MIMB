@@ -1,0 +1,12 @@
+name: dreams_mimb
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - jupyterlab
+  - ipywidgets
+  - notebook
+  - pip:
+      - git+https://github.com/pluskal-lab/DreaMS.git
