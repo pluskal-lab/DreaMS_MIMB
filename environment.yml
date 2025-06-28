@@ -10,4 +10,4 @@ dependencies:
   - notebook
   - pip:
     - git+https://github.com/pluskal-lab/DreaMS.git
-    - massspecgym[notebooks,dev]
+    - massspecgym
