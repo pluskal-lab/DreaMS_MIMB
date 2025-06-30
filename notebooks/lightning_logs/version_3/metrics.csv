@@ -1,3 +1,0 @@
-epoch,step,test_acc,test_loss,val_acc,val_auc,val_loss
-0,4,,,0.0,0.0,0.7612857222557068
-1,5,0.0,0.7641429901123047,,,
