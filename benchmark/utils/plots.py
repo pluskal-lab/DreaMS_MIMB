@@ -129,7 +129,7 @@ def plot_similarity_kde(sim_mat: np.ndarray, figsize=(6, 4), palette_idx=(1,)):
     plt.show()
 
 
-def plot_dissimilarity_hist_kde(sim_mat: np.ndarray, figsize=(6, 4), bins=20, hist_idx=1, kde_idx=2):
+def plot_dissimilarity_hist_kde(sim_mat: np.ndarray, figsize=(6, 4), bins=20, hist_idx=2, kde_idx=0):
     """
     Plot histogram + KDE of dissimilarities (1 - similarity) from upper-triangle only.
 
