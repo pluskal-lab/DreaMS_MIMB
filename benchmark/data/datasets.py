@@ -72,7 +72,7 @@ class BinaryDetectionDataset(Dataset):
     def __init__(self, pth: Path, spec_transform=None, dtype=None):
         self.pth = pth
         self.spec_transform = spec_transform
-        self.dtype = dtype
+        self.dtype = dtype if dtype is not None else torch.float32
         self.load_data()
         self.compute_labels()
 
@@ -205,17 +205,29 @@ class BinaryDetectionDataset(Dataset):
         self.metadata = pd.DataFrame([s.metadata for s in self.spectra])
 
     def compute_labels(self):
-        if 'LABEL' not in self.metadata.columns:
+        cols_lower = {c.lower(): c for c in self.metadata.columns}
+        if 'label' not in cols_lower:
             raise KeyError("No 'LABEL' metadata; please run `annotate_mgf` first.")
-        self.metadata['label'] = self.metadata['LABEL'].astype(float)
+        orig = cols_lower['label']
+        self.metadata['label'] = self.metadata[orig].astype(float)
 
     def __len__(self):
         return len(self.spectra)
 
-    def __getitem__(self, idx):
-        spec = self.spectra[idx]
-        x = self.spec_transform(spec) if self.spec_transform else spec
-        lbl = float(self.metadata.iloc[idx]['label'])
+    def __getitem__(self, idx: int):
+        spec_obj = self.spectra[idx]
+        # apply transformation
+        x = self.spec_transform(spec_obj) if self.spec_transform else spec_obj
+        # ensure input tensor dtype
+        if isinstance(x, torch.Tensor):
+            x = x.to(self.dtype)
+        elif isinstance(x, np.ndarray):
+            x = torch.as_tensor(x, dtype=self.dtype)
+
+        # load label as tensor of same dtype
+        lbl_value = float(self.metadata.iloc[idx]['label'])
+        lbl = torch.tensor(lbl_value, dtype=self.dtype)
+
         return {
             'spec': x,
             'label': lbl,
