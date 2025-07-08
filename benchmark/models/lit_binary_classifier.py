@@ -1,8 +1,11 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+from torch.optim.lr_scheduler import OneCycleLR
 from typing import Optional
 from torchmetrics import Accuracy, AUROC, AveragePrecision, F1Score
+
 
 from benchmark.models.dreams_classifier import DreamsClassifier
 
@@ -84,3 +87,29 @@ class LitBinaryClassifier(pl.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+
+    def configure_optimizers(self):
+        # 1) AdamW with weight decay
+        optimizer = optim.AdamW(
+            self.parameters(),
+            lr=self.hparams.lr,
+            weight_decay=1e-5
+        )
+
+        # 2) One-cycle LR scheduler
+        scheduler = OneCycleLR(
+            optimizer,
+            max_lr=self.hparams.lr,
+            total_steps=self.trainer.estimated_stepping_batches,
+            pct_start=0.1,
+            div_factor=10.0,
+            final_div_factor=100.0,
+        )
+
+        return {
+            'optimizer': optimizer,
+            'lr_scheduler': {
+                'scheduler': scheduler,
+                'interval': 'step',
+            }
+        }
