@@ -8,7 +8,7 @@ from matchms.exporting import save_as_mgf
 import numpy as np
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import default_collate
-from typing import Callable, Optional
+from typing import Callable, Optional, Dict
 
 from paths import PROJECT_ROOT
 from benchmark.utils.plots import init_plotting, get_palette
@@ -231,6 +231,188 @@ class BinaryDetectionDataset(Dataset):
         return {
             'spec': x,
             'label': lbl,
+            'identifier': str(self.metadata.iloc[idx].get('identifier', idx))
+        }
+
+    @staticmethod
+    def collate_fn(batch):
+        return default_collate(batch)
+
+
+class ClassificationDataset(Dataset):
+    """
+    General multi-class classification dataset for MGF data.
+
+    - Expects a `LABEL` metadata entry (integer 0..K-1).
+    - Otherwise, call `annotate_mgf` with a `label_fn` that returns an int.
+    """
+
+    def __init__(self, pth: Path, spec_transform=None, dtype=None):
+        self.pth = pth
+        self.spec_transform = spec_transform
+        # use long for integer labels
+        self.dtype = dtype if dtype is not None else torch.long
+        self.load_data()
+        self.compute_labels()
+
+    @staticmethod
+    def annotate_mgf(input_pth: Path,
+                     output_pth: Path,
+                     label_fn: Callable[[Dict], int]) -> None:
+        """
+        Annotate an unlabeled MGF with integer 'LABEL' metadata and save to `output_pth`.
+        """
+        if output_pth.exists():
+            print(f"{output_pth} exists; skipping.")
+            return
+
+        specs = list(load_from_mgf(str(input_pth)))
+        # skip if already labeled
+        if all('label' in {**s.metadata, **{k.lower():v for k,v in s.metadata.items()}} for s in specs):
+            print("Already contains LABEL; skipping.")
+            return
+
+        df = pd.DataFrame([s.metadata for s in specs])
+        # apply label_fn → integer class
+        df['LABEL'] = df.apply(lambda row: int(label_fn(row)), axis=1)
+
+        # write back into spectra
+        for spec, lbl in zip(specs, df['LABEL']):
+            spec.set('LABEL', str(lbl))
+
+        save_as_mgf(specs, str(output_pth))
+
+        # print distribution
+        dist = df['LABEL'].value_counts().sort_index()
+        total = dist.sum()
+        print("Label distribution:")
+        for cls, cnt in dist.items():
+            print(f"  class {cls}: {cnt} ({cnt/total*100:.1f}%)")
+
+    @staticmethod
+    def plot_fold_distribution(mgf_pth: Path) -> None:
+        """
+        Reads integer 'LABEL' and 'fold' columns (any case) from an annotated MGF and
+        plots stacked bar charts of counts and percentages by fold.
+        """
+        # load all spectra metadata
+        specs = list(load_from_mgf(str(mgf_pth)))
+        df = pd.DataFrame([s.metadata for s in specs])
+
+        # case-insensitive lookup
+        cols_lower = {c.lower(): c for c in df.columns}
+        if 'label' not in cols_lower or 'fold' not in cols_lower:
+            raise KeyError("Need both 'LABEL' and 'fold' (any case) in metadata to plot.")
+        label_col = cols_lower['label']
+        fold_col  = cols_lower['fold']
+
+        # group & unstack to get counts
+        fc = df.groupby([fold_col, label_col]).size().unstack(fill_value=0)
+
+        # styling
+        init_plotting(figsize=(6,4), font_scale=1.0, style='whitegrid', cmap='nature')
+        palette = get_palette('nature')
+
+        # bar plot of counts
+        fig, ax = plt.subplots()
+        fc.plot(kind='bar', stacked=True, ax=ax,
+                color=[palette[i] for i in range(fc.shape[1])])
+        ax.set_title('Class counts by fold')
+        ax.set_xlabel(fold_col.capitalize())
+        ax.set_ylabel('Count')
+        ax.tick_params(axis='x', rotation=0)
+        plt.show()
+
+        # bar plot of percentages
+        pct = fc.div(fc.sum(axis=1), axis=0) * 100
+        fig2, ax2 = plt.subplots()
+        pct.plot(kind='bar', stacked=True, ax=ax2,
+                 color=[palette[i] for i in range(pct.shape[1])])
+        ax2.set_title('Class % by fold')
+        ax2.set_xlabel(fold_col.capitalize())
+        ax2.set_ylabel('Percent')
+        ax2.tick_params(axis='x', rotation=0)
+        plt.show()
+
+    @staticmethod
+    def visualize_examples(mgf_pth: Path, smiles_key: str = 'library_SMILES') -> None:
+        """
+        Displays one example per class:
+          - Plots the spectrum (via su_plot) using mz/int arrays.
+          - Renders the molecule (RDKit).
+          - Prints the full metadata dict.
+        Case‐insensitive on the 'label' column.
+        """
+        specs = list(load_from_mgf(str(mgf_pth)))
+        df = pd.DataFrame([s.metadata for s in specs])
+
+        # case‐insensitive lookup of 'label'
+        cols_lower = {c.lower(): c for c in df.columns}
+        if 'label' not in cols_lower:
+            raise KeyError("No 'label' (any case) in metadata; run annotate_mgf first.")
+        label_col = cols_lower['label']
+
+        # ensure it's integer, so we can sort properly
+        df[label_col] = df[label_col].astype(int)
+        # find all classes present
+        unique_labels = sorted(df[label_col].unique())
+
+        for lbl in unique_labels:
+            subset = df[df[label_col] == lbl]
+            if subset.empty:
+                continue
+
+            idx = subset.index[0]
+            row = subset.loc[idx].to_dict()
+            print(f"\n=== Example for class {lbl} ===")
+
+            # build spectrum array
+            spec_obj = specs[idx]
+            mzs = spec_obj.peaks.mz
+            ints = spec_obj.peaks.intensities
+            spec_array = np.vstack([mzs, ints])
+
+            # plot
+            prec = row.get('precursor_mz') or row.get('PRECURSOR_MZ')
+            su_plot(spec=spec_array, prec_mz=prec)
+
+            # show molecule if you have SMILES
+            if smiles_key in row:
+                display(MolFromSmiles(row[smiles_key]))
+
+            # print full metadata
+            print(row)
+
+    def load_data(self):
+        if self.pth.suffix.lower() != ".mgf":
+            raise ValueError("Unsupported file type")
+        from matchms.importing import load_from_mgf
+        self.spectra = list(load_from_mgf(str(self.pth)))
+        self.metadata = pd.DataFrame([s.metadata for s in self.spectra])
+
+    def compute_labels(self):
+        # find 'label' (case‐insensitive)
+        cols = {c.lower(): c for c in self.metadata.columns}
+        if 'label' not in cols:
+            raise KeyError("No 'LABEL' metadata; run annotate_mgf first.")
+        self.metadata['label'] = self.metadata[cols['label']].astype(int)
+
+    def __len__(self):
+        return len(self.spectra)
+
+    def __getitem__(self, idx: int):
+        spec = self.spectra[idx]
+        x = self.spec_transform(spec) if self.spec_transform else spec
+        # ensure tensor
+        if isinstance(x, torch.Tensor):
+            x = x.to(torch.float)  # model input still float
+        elif isinstance(x, np.ndarray):
+            x = torch.as_tensor(x, dtype=torch.float)
+
+        lbl = int(self.metadata.iloc[idx]['label'])
+        return {
+            'spec': x,
+            'label': torch.tensor(lbl, dtype=torch.long),
             'identifier': str(self.metadata.iloc[idx].get('identifier', idx))
         }
 
