@@ -33,6 +33,7 @@ DreaMS_MIMB/
 │    ├── 5_prediction_investigation.ipynb # Dive into predictions and their meaning
 │
 ├── environment.yml    # Reproducible setup for Conda
+├── benchmark          # All main code and packages used in the tutorials
 ├── paths.py           # Unified project paths for all code
 ├── data/              # Where your data files go (see notebooks for instructions)
 ├── README.md          # You are here!
@@ -40,7 +41,8 @@ DreaMS_MIMB/
 
 ---
 
-## 🛠️ Step 1: Prerequisites
+
+<h2 id="step1">🛠️ Step 1: Prerequisites</h2>
 
 Before you start, make sure you have:
 - **Anaconda / Miniconda installed**  
@@ -114,34 +116,42 @@ You can get the code just as easily! This method does the same thing as the `git
 ---
 
 **What’s happening in this step?**  
-You are simply downloading all the resources and code needed for this tutorial – like getting all the pieces of a board game out of the box.  
-*Don’t worry – using the ZIP file is just as good as using Git!*
+You are simply downloading all the resources and code needed for this tutorial.
+
+*Don’t worry, using the ZIP file is just as good as using Git!*
 
 ---
 
-## 🧪 Step 3: Setup Your Environment (Windows, macOS, Linux)
+<h2 id="step3">🧪 Step 3: Setup Your Environment (Windows, macOS, Linux)</h2>
 
 **Confirm Conda is working**
 
+**First, make sure you’re using the terminal in the same folder as the previous step (the DreaMS_MIMB folder)**. If you closed your terminal, just open a new one and use cd to enter your project folder again.
+
+To check that Conda is installed and working, type:
 ```bash
 conda --version
 ```
 
-If you see the version number, proceed! If not, see Step 1.
+If you see the version number, proceed! If not, [go back to Step 1](#step1).
 
 1. **Create the Conda Environment**  
-   This ensures all dependencies work on your system:
+   Now you’ll set up a dedicated workspace for this project, with all the right tools and libraries. In your terminal, type:
 
     ```bash
     conda env create -f environment.yml
     ```
+   This command will automatically install everything needed for the tutorial.
 
 2. **Activate the Environment**
-
+	
+	Next, activate your new workspace with:
     ```bash
     conda activate dreams_mimb
     ```
-TODO explain here what is going on here a little. Why we need activate something
+	**What does “activate” mean?**
+	- By “activating” the environment, you make sure that any commands you run will use the correct versions of Python and all necessary libraries, without interfering with other projects or programs on your computer.
+    - You’ll need to activate this environment every time you open a new terminal and want to work on this project.
 
 If you see errors about “conda command not found,” make sure you have Conda installed and restart your terminal.
 
@@ -149,30 +159,40 @@ If you see errors about “conda command not found,” make sure you have Conda 
 
 ## 📓 Step 4: Start Jupyter Notebooks
 
-You must use Jupyter Notebooks to run this project!  
-Jupyter Notebooks allow you to run code interactively, step by step, and see immediate results.
+To work with this project, you **must** use Jupyter Notebooks.
+Jupyter lets you run small pieces of code (called “cells”), see the results instantly, and mix code with explanations, all in your web browser.
 
 **(A) Recommended: JupyterLab**
 
-In your terminal (with your environment activated):
+In your terminal (make sure your environment is activated), type:
 
 ```bash
 jupyter lab
 ```
 
-- This will open a new tab in your browser.
-- Navigate to the notebooks folder.
+- After a few seconds, your default web browser will open automatically.
+If not, copy and paste the link from your terminal into your browser.
+- You’ll see a file browser, navigate into the notebooks folder on the left side.
 - Start with `1_data_preparation.ipynb` and proceed step by step.  
   **TODO:** Add screenshot of browser interface and notebooks folder!
 
-**(B) Classic Notebook (if you prefer):**
+**(B) Classic Jupyter notebook (if you prefer):**
 
 ```bash
 jupyter notebook
 ```
 
-- Works exactly the same way.  
+- Type this command in your terminal (just like before).
+- This will also open a new tab in your browser, but with a simpler interface.
+- Find and open the notebooks folder, then open the first notebook.
+
   **TODO:** Add screenshot or note where this command is run: always in the terminal!
+
+**Tip:**
+Both JupyterLab and the classic notebook work the same way for this tutorial, choose the one you like best!
+Just remember:
+- You **always** run jupyter lab or jupyter notebook **in your terminal** (not in a Python console or elsewhere).
+- **Always** make sure you have activated your Conda environment before starting ([see Step 3](#step3)).
 
 ---
 
