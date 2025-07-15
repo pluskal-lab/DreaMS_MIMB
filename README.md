@@ -191,11 +191,11 @@ jupyter notebook
 
   **TODO:** Add screenshot or note where this command is run: always in the terminal!
 
-**Tip:**
-Both JupyterLab and the classic notebook work the same way for this tutorial, choose the one you like best!
-Just remember:
-- You **always** run jupyter lab or jupyter notebook **in your terminal** (not in a Python console or elsewhere).
-- **Always** make sure you have activated your Conda environment before starting ([see Step 3](#step3)).
+>  **Tip:**  
+> Both JupyterLab and the classic notebook work the same way for this tutorial, choose the one you like best!  
+> Just remember:  
+> - You **always** run `jupyter lab` or `jupyter notebook` **in your terminal** (not in a Python console or elsewhere).  
+> - **Always** make sure you have activated your Conda environment before starting ([see Step 3](#step3)).
 
 ---
 
