@@ -198,17 +198,30 @@ Just remember:
 
 ## 📚 Step 5: Follow the Tutorials
 
-- The notebooks are numbered—go through them in order for best results.
-- Each notebook includes:
-  - Explanations: What you are about to do, and why
-  - Code cells: With detailed comments
-  - Instructions: What to change, where to add your data, what to expect
+Once your environment is set up, you're ready to explore the project through interactive Jupyter notebooks.
 
-**Tip:**
-- Jupyter notebooks are organized into “cells”.
-- You run one cell at a time by clicking the cell and pressing `Shift + Enter`.
-- Cells must be run in order from the top:  
-  Make sure all previous cells have been run before running a new one, or you may get errors!
+### 🔢 Notebook Order
+
+- Navigate to the `notebooks` folder in the project directory.
+- Start with the first notebook: `1_data_preparation.ipynb`.
+- The notebooks are numbered in the order you should follow.
+- Each notebook builds on the previous one, it's important to follow them sequentially.
+
+### 📓 How to Use Jupyter Notebooks
+
+Jupyter notebooks are interactive documents that combine code, text, and visualizations. Here's how to work with them:
+
+- Notebooks are made up of “cells” — either code or explanatory text.
+- Run one cell at a time:
+  - Click on a cell to select it.
+  - Press `Shift + Enter` to run the cell and move to the next one.
+- **Always run notebooks from top to bottom**, step by step.
+  - If you skip cells, later parts may not work correctly.
+  - Restarting the kernel resets the notebook’s memory, you'll need to re-run all previous cells.
+
+> **Tip:** If you're new to Jupyter, check the top menu for a ▶️ **Run** button, it's a quick way to execute the selected cell.
+
+
 - **TODO:** Add screenshot of notebook with cells, and highlight the Run button
 
 ---
