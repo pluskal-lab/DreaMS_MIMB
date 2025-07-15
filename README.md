@@ -19,7 +19,7 @@ This project guides you through the full workflow—from data preparation, throu
 
 ---
 
-## 🗂️ Project Structure
+<h2 id="project-structure">🗂️ Project Structure</h2>
 
 ```
 DreaMS_MIMB/
@@ -44,6 +44,9 @@ DreaMS_MIMB/
 
 <h2 id="step1">🛠️ Step 1: Prerequisites</h2>
 
+> ⚠️ **Experienced user?**  
+> You can skip directly to the [Minimal setup commands](#quick-setup).
+
 Before you start, make sure you have:
 - **Anaconda / Miniconda installed**  
   (Recommended: Miniconda for minimal install; both Windows, Mac, and Linux are supported.)
@@ -51,7 +54,7 @@ Before you start, make sure you have:
 
 If you don’t have Conda yet:
 1. Download Miniconda from [here](https://docs.conda.io/en/latest/miniconda.html)
-2. Follow the official install instructions for your operating system  
+2. Follow the official install instructions for your operating system
 
 
 **How to check if Conda is installed**
@@ -203,15 +206,16 @@ Once your environment is set up, you're ready to explore the project through int
 ### 🔢 Notebook Order
 
 - Navigate to the `notebooks` folder in the project directory.
-- Start with the first notebook: `1_data_preparation.ipynb`.
+- Start with the first notebook: [`1_data_preparation.ipynb`](#project-structure)  
+(You can learn more about the project layout [here](#project-structure).)
 - The notebooks are numbered in the order you should follow.
 - Each notebook builds on the previous one, it's important to follow them sequentially.
 
-### 📓 How to Use Jupyter Notebooks
+### How to Use Jupyter Notebooks
 
 Jupyter notebooks are interactive documents that combine code, text, and visualizations. Here's how to work with them:
 
-- Notebooks are made up of “cells” — either code or explanatory text.
+- Notebooks are made up of “cells”, either code or explanatory text.
 - Run one cell at a time:
   - Click on a cell to select it.
   - Press `Shift + Enter` to run the cell and move to the next one.
@@ -229,50 +233,59 @@ Jupyter notebooks are interactive documents that combine code, text, and visuali
 ## 🧩 Troubleshooting
 
 - If you run into issues:
-  - Check the Issues tab on GitHub, or open a new issue with your question.  
-    **TODO:** Provide screenshot of creating a GitHub issue
-- Common errors:
-  - See the Notes section in our book chapter for the most common pitfalls and solutions.
+
+  - **Check the Issues tab on GitHub**  
+    Visit the Issues section of our GitHub page.  
+    If your problem isn’t already answered there, you can create a new issue by clicking the **“New Issue”** button and describing your problem (including any error messages).
+
+  - **Check for common problems**  
+    See the **“Notes”** section in our book chapter, where we list the most common pitfalls and solutions.
+
 - **Still stuck?**  
-  If you don’t find an answer in the Notes section or we haven’t responded on GitHub, you can also use large language models (like ChatGPT or GitHub Copilot). Just paste your error message and the code you’re struggling with—often, these tools can help you quickly find a solution to common mistakes.
+  If you don’t find an answer in the Notes section or we haven’t responded on GitHub, you can also use large language models (like ChatGPT or GitHub Copilot).  
+  Just paste your error message and the code you’re struggling with. Often, these tools can help you quickly find a solution to common mistakes.
 
 ---
 
-## 🔗 More Resources
+## 📖 Key Publications
 
-- DreaMS Foundation Model (Pluskal Lab)
-- MassSpecGym
-- **TODO:** Add more links or resources as needed
+The methods and tools used in this repository are based on the following peer-reviewed research:
 
----
+- **Bushuiev, R. *et al.* (2025)**  
+  *Self-supervised learning of molecular representations from millions of tandem mass spectra using DreaMS*  
+  **Nature Biotechnology**  
+  [https://www.nature.com/articles/s41587-025-02663-3](https://www.nature.com/articles/s41587-025-02663-3)
 
-## 📝 Contributing
-
-Suggestions, corrections, and pull requests are welcome!  
-Please open an issue or pull request to contribute.
-
----
-
-## 🙌 Acknowledgements
-
-This project was developed as a companion for the DreaMS tutorial chapter and for anyone who wants to explore modern ML for mass spectrometry—step by step and code-first.
+- **Bushuiev, R. *et al.* (2024)**  
+  *MassSpecGym: A benchmark for the discovery and identification of molecules*  
+  **NeurIPS 2024**  
+  [https://arxiv.org/abs/2410.23326](https://arxiv.org/abs/2410.23326)
 
 ---
 
-## 🎉 Happy Learning and Exploring!
+## 🤝 Contributing & Credits
+
+Have ideas, corrections, or something to share?  
+Pull requests and suggestions are always welcome!
+
+If you spot an issue or want to improve the project, feel free to:
+
+- Open an issue to report a bug or suggest a feature
+- Submit a pull request with improvements or fixes
+- Comment on existing discussions to share your input
+
+We welcome all contributions, to help improve these tutorials and make them more useful to the community.
 
 ---
 
-<!--
-TODO:
-- Add screenshots, videos, and GIFs where marked
-- Add direct links to resources and documentation
-- Consider adding a FAQ section or expanding Troubleshooting as new questions come in
--->
+### 🙏 Acknowledgments
 
----
+Special thanks to everyone who helped shape these tutorials.
 
-## Minimal Setup Commands (for quick copy-paste):
+This project was developed as a companion to the DreaMS book chapter, designed for researchers and students curious about **modern machine learning in mass spectrometry**, with a **hands-on, code-first approach**.
+
+
+<h2 id="quick-setup"> Minimal setup commands (for quick copy-paste)</h2>
 
 ```bash
 git clone https://github.com/Jozefov/DreaMS_MIMB.git
@@ -281,153 +294,3 @@ conda env create -f environment.yml
 conda activate dreams_mimb
 jupyter lab
 ```
-
----
-
-Let me know when you’re ready to add the images, videos, or GIFs!  
-Or if you want custom “intro text” for the start of each notebook, just ask.
-
-⸻
-
-[//]: # (Let me know when you’re ready to add the images, videos, or GIFs!)
-
-[//]: # (Or if you want custom “intro text” for the start of each notebook, just ask.)
-
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # (If you don’t have Conda yet:)
-
-[//]: # (	•	Download Miniconda from here)
-
-[//]: # (	•	Follow the official install instructions for your operating system)
-
-[//]: # (# TODO ADD VIDEOS )
-
-[//]: # ()
-[//]: # (📦 Step 2: Get the Code)
-
-[//]: # ()
-[//]: # (Open your terminal &#40;Anaconda Prompt on Windows!&#41; and run:)
-
-[//]: # (#TO DO add image, or shortcut what you are opening, Then better to say you should navigate to folder where you want to have this project)
-
-[//]: # ()
-[//]: # (git clone https://github.com/Jozefov/DreaMS_MIMB.git)
-
-[//]: # (cd DreaMS_MIMB)
-
-[//]: # (# TODO show this, screen shots:)
-
-[//]: # (If you don’t have git installed, you can also download the ZIP from the GitHub page and extract it, then open your terminal and cd into the folder.)
-
-[//]: # ()
-[//]: # (🧪 Step 3: Setup Your Environment &#40;Windows, macOS, Linux&#41;)
-
-[//]: # (# TODO some command to show if conda is installed properly, plus before we should explain it a little.)
-
-[//]: # (1. Create the Conda Environment)
-
-[//]: # ()
-[//]: # (&#40;This ensures all dependencies work on your OS.&#41;)
-
-[//]: # (conda env create -f environment.yml)
-
-[//]: # ()
-[//]: # (2. Activate the Environment)
-
-[//]: # (conda activate dreams_mimb)
-
-[//]: # (If you see errors about “conda command not found,” make sure you have Conda installed and restart your terminal!)
-
-[//]: # ()
-[//]: # ()
-[//]: # (📓 Step 4: Start JupyterLab or Notebook)
-
-[//]: # (# TODO make stronger statement, like we need jupyter notebooks for running this project.)
-
-[//]: # (&#40;A&#41; Recommended: JupyterLab)
-
-[//]: # (# TODO show images and say for everything where you running it, like in terminal, in google where, always say where:)
-
-[//]: # ()
-[//]: # (	•	This will open a new tab in your browser.)
-
-[//]: # (	•	Navigate to the notebooks folder.)
-
-[//]: # (	•	Start with 1_data_preparation.ipynb and proceed step by step.)
-
-[//]: # ()
-[//]: # (&#40;B&#41; Classic Notebook &#40;if you prefer&#41;)
-
-[//]: # (jupyter notebook)
-
-[//]: # (	•	Works exactly the same way.)
-
-[//]: # ()
-[//]: # (📚 Step 5: Follow the Tutorials)
-
-[//]: # (	•	The notebooks are numbered—go through them in order for best results.)
-
-[//]: # (	•	Each notebook includes:)
-
-[//]: # (	•	Explanations: What you are about to do, and why)
-
-[//]: # (	•	Code cells: With detailed comments)
-
-[//]: # (	•	Instructions: What to change, where to add your data, what to expect)
-
-[//]: # (Tip: If you are new to Jupyter Notebooks, you can run each cell with Shift + Enter.)
-
-[//]: # (# TODO Here we should also say like jupyter notebooks has cells or something and we are running just cell not that all code you see in notebook, just cell by cell and when you have run specific one you haver ensure that all that are before were run, so the one you want will work.)
-
-[//]: # ()
-[//]: # (🧩 Troubleshooting)
-
-[//]: # (	•	If you run into issues:)
-
-[//]: # (Check the Issues tab, or open a new issue with your question in github )
-
-[//]: # (# TODO provide image.)
-
-[//]: # (	•	Common errors:)
-
-[//]: # (	•	Look at NOtes section in our book chapet where are written most common pitfalls and how to solve them.)
-
-[//]: # (Besides that i highly recomend if you have not find answer in notes section or we have not managed to respond in issues section at github, i would recommend to use these large languge models as cloud or github, by wirting it whit what part of code you have problem and what is you error. Often it can be really simple problem we have not considered and theroefre can be solved in manners of seconds.)
-
-[//]: # ()
-[//]: # (# TODO for all add link)
-
-[//]: # (🔗 More Resources)
-
-[//]: # (	•	DreaMS Foundation Model &#40;Pluskal Lab&#41;)
-
-[//]: # (	•	MassSpecGym)
-
-[//]: # ()
-[//]: # (# TODO we can add gifs)
-
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # (A minimal, reproducible environment for working with the [DreaMS]&#40;https://github.com/pluskal-lab/DreaMS&#41; foundation model for mass spectrometry.)
-
-[//]: # ()
-[//]: # (---)
-
-[//]: # ()
-[//]: # (## 🔧 Setup)
-
-[//]: # ()
-[//]: # (```bash)
-
-[//]: # (git clone git@github.com:Jozefov/DreaMS_MIMB.git)
-
-[//]: # (cd DreaMS_MIMB)
-
-[//]: # (conda env create -f environment.yml)
-
-[//]: # (conda activate dreams_mimb)
