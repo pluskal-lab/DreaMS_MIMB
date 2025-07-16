@@ -197,7 +197,14 @@ cython_debug/
 .idea/
 
 
-/data/
+# ignore everything under the repository-root /data/ directory
+/data/**
+
+# but do NOT ignore these three files
+!/data/Piper_data_smiles.csv
+!/data/Piper_sirius_all_annotated.mgf
+!/data/Piper_sirius_matched_annotated.mgf
+
 lightning_logs/
 *.ckpt
 /results/
