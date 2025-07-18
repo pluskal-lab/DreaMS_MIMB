@@ -25,9 +25,11 @@ This project guides you through the full workflow—from data preparation, throu
 DreaMS_MIMB/
 │
 ├── notebooks/
-│    ├── 1_data_preparation.ipynb         # Start here: loading and understanding your data
+│    ├── 0_notebook_tutorial.ipynb        # Start here: understanding work with notebooks and data
+│    ├── 1_data_preparation.ipynb         # Loading and understanding MSData objects
 │    ├── 2_deduplication.ipynb            # How to deduplicate spectra
 │    ├── 3_library_matching.ipynb         # Match data to spectral libraries
+TODO LOWER NOT PREPARED YET
 │    ├── 4_1_DreaMS_focal_loss.ipynb      # Learn about focal loss in DreaMS
 │    ├── 4_DreaMS_finetuning.ipynb        # Fine-tune the DreaMS model
 │    ├── 5_prediction_investigation.ipynb # Dive into predictions and their meaning
