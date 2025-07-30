@@ -1,64 +1,103 @@
-import argparse
+#!/usr/bin/env python
+import sys
 from pathlib import Path
-
+import hydra
+from omegaconf import OmegaConf
+import torch
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
+from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.loggers import WandbLogger
 
-from benchmark.data.datasets import ChlorineDetectionDataset
-from benchmark.data.data_module import BenchmarkDataModule
-from benchmark.models.classifier import MLPClassifier
-from benchmark.models.lit_module import LitClassifier
-from benchmark.utils import infer_spec_dim
-
-from massspecgym.data.transforms import SpecBinner
+# Add project root to path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 from paths import PROJECT_ROOT
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--max_epochs", type=int, default=10)
-    parser.add_argument("--num_workers", type=int, default=4)
-    parser.add_argument("--gpus", type=int, default=1, help="Number of GPUs (0 for CPU)")
-    parser.add_argument(
-        "--logger", choices=["tb", "wandb"], default="tb", help="Logger choice"
-    )
-    args = parser.parse_args()
+from benchmark.data.datasets import BinaryDetectionDataset
+from benchmark.data.data_module import BenchmarkDataModule
+from benchmark.models import MODEL_REGISTRY
 
-    # 1. data & transforms
-    spec_transform = SpecBinner(max_mz=1000.0, bin_width=1.0)
-    dataset = ChlorineDetectionDataset(
+@hydra.main(config_path="../configs", config_name="test_config")
+def main(cfg):
+    # Convert full Hydra config to dict for WandB
+    config_dict = OmegaConf.to_container(cfg, resolve=True)
+
+    # 1) WandB logger
+    wandb_logger = WandbLogger(
+        project=cfg.logger.project,
+        entity=cfg.logger.entity,
+        name=cfg.logger.name,
+        config=config_dict
+    )
+
+    # 2) Callbacks
+    ckpt_dir = PROJECT_ROOT / cfg.callbacks.checkpoint.dirpath
+    checkpoint_cb = ModelCheckpoint(
+        monitor=cfg.callbacks.checkpoint.monitor,
+        mode=cfg.callbacks.checkpoint.mode,
+        save_top_k=cfg.callbacks.checkpoint.save_top_k,
+        dirpath=str(ckpt_dir)
+    )
+    lr_monitor = LearningRateMonitor(logging_interval=cfg.callbacks.lr_monitor.logging_interval)
+
+    # 3) Annotate MGF
+    input_mgf = PROJECT_ROOT / cfg.data.mgf_path
+    output_mgf = PROJECT_ROOT / cfg.data.labeled_mgf
+    BinaryDetectionDataset.annotate_mgf(
+        input_pth=input_mgf,
+        output_pth=output_mgf,
+        label_fn=lambda md: float(cfg.data.label_element in md.get("formula", ""))
+    )
+
+    # 4) DataModule
+    spec_transform = hydra.utils.instantiate(cfg.data.transform)
+    dataset = hydra.utils.instantiate(
+        cfg.data.dataset,
+        pth=output_mgf,
         spec_transform=spec_transform,
-        pth=PROJECT_ROOT / "data" / "massspecgym" / "MassSpecGym.mgf",
     )
-    dm = BenchmarkDataModule(
+    datamodule = hydra.utils.instantiate(
+        cfg.data.datamodule,
         dataset=dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
     )
 
-    # 2. model
-    input_dim = infer_spec_dim(spec_transform)
-    model = MLPClassifier(input_dim=input_dim)
-    lit_model = LitClassifier(model)
+    # 5) Model instantiation
+    model_cls = MODEL_REGISTRY[cfg.model.name]
+    # Resolve checkpoint path
+    ckpt_path = Path(cfg.model.hparams.ckpt_path)
+    if not ckpt_path.is_absolute():
+        cfg.model.hparams.ckpt_path = str(PROJECT_ROOT / ckpt_path)
+    hparams = OmegaConf.to_container(cfg.model.hparams, resolve=True)
+    model = model_cls(**hparams)
 
-    # 3. logger
-    if args.logger == "tb":
-        logger = TensorBoardLogger("tb_logs", name="chlorine_detect")
+        # 6) Trainer hardware args
+    if torch.cuda.is_available():
+        accel_kwargs = {'accelerator': 'gpu', 'devices': torch.cuda.device_count()}
+    elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        accel_kwargs = {'accelerator': 'mps', 'devices': 1}
     else:
-        logger = WandbLogger(project="chlorine-detect")
+        accel_kwargs = {'accelerator': 'cpu', 'devices': 1}
 
-    # 4. trainer
+    # 7) Trainer
     trainer = pl.Trainer(
-        max_epochs=args.max_epochs,
-        accelerator="gpu" if args.gpus > 0 else "cpu",
-        devices=args.gpus if args.gpus > 0 else None,
-        strategy="ddp" if args.gpus > 1 else None,
-        logger=logger,
+        logger=wandb_logger,
+        callbacks=[checkpoint_cb, lr_monitor],
+        max_epochs=cfg.trainer.max_epochs,
+        gradient_clip_val=cfg.trainer.gradient_clip_val,
+        precision=cfg.trainer.precision,
+        **accel_kwargs
+    )
+    trainer = pl.Trainer(
+        logger=wandb_logger,
+        callbacks=[checkpoint_cb, lr_monitor],
+        max_epochs=cfg.trainer.max_epochs,
+        gradient_clip_val=cfg.trainer.gradient_clip_val,
+        precision=cfg.trainer.precision,
+        **accel_kwargs
     )
 
-    # 5. run
-    trainer.fit(lit_model, dm)
-    trainer.test(lit_model, dm)
+    # 8) Fit & Test
+    trainer.fit(model, datamodule)
+    trainer.test(model, datamodule=datamodule)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
