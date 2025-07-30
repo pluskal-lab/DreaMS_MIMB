@@ -1,9 +1,13 @@
 # configs/config.yaml
 
+hydra:
+  job:
+    chdir: false
+
 # === Data Section ===
 data:
-  mgf_path: ${hydra:runtime.cwd}/data/massspecgym/MassSpecGym.mgf
-  labeled_mgf: ${hydra:runtime.cwd}/data/massspecgym/MassSpecGym_chlorine.mgf
+  mgf_path: data/massspecgym/MassSpecGym.mgf
+  labeled_mgf: data/massspecgym/MassSpecGym_chlorine.mgf
   label_element: Cl
 
   transform:
@@ -24,9 +28,9 @@ data:
 
 # === Model Section ===
 model:
-  name: dreams_classifier      # key into MODEL_REGISTRY
+  name: lit_classifier
   hparams:
-    ckpt_path: ${hydra:runtime.cwd}/data/model_checkpoints/ssl_model.ckpt
+    ckpt_path: data/model_checkpoints/ssl_model.ckpt
     num_classes: 2
     n_highest_peaks: 64
     lr: 1e-5
@@ -52,13 +56,13 @@ logger:
   entity:  jozefov-iocb-prague
   name:    chlorine_experiment_01
   # pass the full config so you can see hyperparams in WandB
-  config:  ${hydra:runtime.cwd}/configs/config.yaml
+  config:  configs/test_config.yaml
 
 callbacks:
   checkpoint:
     monitor: val_loss
     mode: min
     save_top_k: 1
-    dirpath: ${hydra:runtime.cwd}/checkpoints
+    dirpath: checkpoints
   lr_monitor:
     logging_interval: step
