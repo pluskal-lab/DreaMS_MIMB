@@ -1,4 +1,5 @@
 import abc
+import sys
 import pandas as pd
 import torch
 from pathlib import Path
@@ -10,6 +11,7 @@ from torch.utils.data import Dataset
 from torch.utils.data.dataloader import default_collate
 from typing import Callable, Optional, Dict
 
+sys.path.append(str(Path().resolve().parent))
 from paths import PROJECT_ROOT
 from benchmark.utils.plots import init_plotting, get_palette
 
