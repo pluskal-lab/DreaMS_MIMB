@@ -1,0 +1,64 @@
+# configs/config.yaml
+
+# === Data Section ===
+data:
+  mgf_path: ${hydra:runtime.cwd}/data/massspecgym/MassSpecGym.mgf
+  labeled_mgf: ${hydra:runtime.cwd}/data/massspecgym/MassSpecGym_chlorine.mgf
+  label_element: Cl
+
+  transform:
+    _target_: massspecgym.data.transforms.SpecTokenizer
+    n_peaks: 64
+
+  dataset:
+    _target_: benchmark.data.datasets.BinaryDetectionDataset
+    # will be overridden by train.py to point at labeled_mgf
+    pth: ${data.labeled_mgf}
+    spec_transform: ${data.transform}
+
+  datamodule:
+    _target_: benchmark.data.data_module.BenchmarkDataModule
+    dataset: ${data.dataset}
+    batch_size: 64
+    num_workers: 0
+
+# === Model Section ===
+model:
+  name: dreams_classifier      # key into MODEL_REGISTRY
+  hparams:
+    ckpt_path: ${hydra:runtime.cwd}/data/model_checkpoints/ssl_model.ckpt
+    num_classes: 2
+    n_highest_peaks: 64
+    lr: 1e-5
+    dropout: 0.1
+    train_encoder: true
+    use_focal: true
+    gamma: 0.5
+    alpha: 0.8
+    pos_weight: null
+
+# === Trainer Section ===
+trainer:
+  _target_: pytorch_lightning.Trainer
+  max_epochs: 1
+  gradient_clip_val: 0.5
+  precision: 16     # mixed‐precision if hardware supports
+
+# === Logger ===
+logger:
+  # Hydra will call: WandbLogger(**this dict)
+  _target_: pytorch_lightning.loggers.WandbLogger
+  project: PhantoMS_Retrieval
+  entity:  jozefov-iocb-prague
+  name:    chlorine_experiment_01
+  # pass the full config so you can see hyperparams in WandB
+  config:  ${hydra:runtime.cwd}/configs/config.yaml
+
+callbacks:
+  checkpoint:
+    monitor: val_loss
+    mode: min
+    save_top_k: 1
+    dirpath: ${hydra:runtime.cwd}/checkpoints
+  lr_monitor:
+    logging_interval: step
