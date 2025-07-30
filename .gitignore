@@ -208,3 +208,5 @@ cython_debug/
 lightning_logs/
 *.ckpt
 /results/
+/output/
+/wandb/
