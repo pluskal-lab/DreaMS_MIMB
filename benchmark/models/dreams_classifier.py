@@ -4,6 +4,14 @@ import torch.nn.functional as F
 from dreams.api import PreTrainedModel
 from dreams.models.dreams.dreams import DreaMS as DreaMSModel
 
+import argparse, pathlib
+
+# allow argparse.Namespace and pathlib.PosixPath in safe unpickling
+torch.serialization.add_safe_globals([
+    argparse.Namespace,
+    pathlib.PosixPath,
+])
+
 
 class DreamsClassifier(nn.Module):
     """
