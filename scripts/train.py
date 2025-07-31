@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+
+import torch
+_orig_torch_load = torch.load
+
+def _patched_torch_load(f, *args, **kwargs):
+    # Always allow full unpickling for trusted checkpoints
+    kwargs['weights_only'] = False
+    return _orig_torch_load(f, *args, **kwargs)
+
+torch.load = _patched_torch_load
+
 import sys
 from pathlib import Path
 import hydra
@@ -7,6 +18,10 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
+
+import wandb
+import atexit
+atexit.register(lambda: wandb.finish())
 
 # Add project root to path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -71,21 +86,13 @@ def main(cfg):
 
         # 6) Trainer hardware args
     if torch.cuda.is_available():
-        accel_kwargs = {'accelerator': 'gpu', 'devices': torch.cuda.device_count()}
+        accel_kwargs = {'accelerator': 'gpu', 'devices': 1}
     elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
         accel_kwargs = {'accelerator': 'mps', 'devices': 1}
     else:
         accel_kwargs = {'accelerator': 'cpu', 'devices': 1}
 
     # 7) Trainer
-    trainer = pl.Trainer(
-        logger=wandb_logger,
-        callbacks=[checkpoint_cb, lr_monitor],
-        max_epochs=cfg.trainer.max_epochs,
-        gradient_clip_val=cfg.trainer.gradient_clip_val,
-        precision=cfg.trainer.precision,
-        **accel_kwargs
-    )
     trainer = pl.Trainer(
         logger=wandb_logger,
         callbacks=[checkpoint_cb, lr_monitor],
