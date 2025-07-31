@@ -103,6 +103,10 @@ class LitClassifier(pl.LightningModule):
             self.log('val_auc', self.val_auc(probs, y.long()), prog_bar=True)
             self.log('val_pr',  self.val_pr(probs, y.long()), prog_bar=True)
             self.log('val_f1',  self.val_f1(probs, y.long()), prog_bar=True)
+        if stage == 'test':
+            self.log('test_auc', self.val_auc(probs, y.long()), prog_bar=True)
+            self.log('test_pr', self.val_pr(probs, y.long()), prog_bar=True)
+            self.log('test_f1', self.val_f1(probs, y.long()), prog_bar=True)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -112,7 +116,7 @@ class LitClassifier(pl.LightningModule):
         return self.step(batch, 'val')
 
     def test_step(self, batch, batch_idx):
-        return self.step(batch, 'val')
+        return self.step(batch, 'test')
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=1e-5)
