@@ -10,8 +10,14 @@ def _patched_torch_load(f, *args, **kwargs):
 
 torch.load = _patched_torch_load
 
+# Add project root to path
 import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from paths import PROJECT_ROOT
+
+from datetime import datetime
+
 import hydra
 from omegaconf import OmegaConf
 import torch
@@ -20,12 +26,6 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
 
 import wandb
-import atexit
-atexit.register(lambda: wandb.finish())
-
-# Add project root to path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from paths import PROJECT_ROOT
 
 from benchmark.data.datasets import BinaryDetectionDataset
 from benchmark.data.data_module import BenchmarkDataModule
@@ -37,10 +37,14 @@ def main(cfg):
     config_dict = OmegaConf.to_container(cfg, resolve=True)
 
     # 1) WandB logger
+    # prepend a timestamp so each run is unique
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_name = f"{ts}_{cfg.logger.name}"
+
     wandb_logger = WandbLogger(
         project=cfg.logger.project,
         entity=cfg.logger.entity,
-        name=cfg.logger.name,
+        name=run_name,
         config=config_dict
     )
 
@@ -50,6 +54,7 @@ def main(cfg):
         monitor=cfg.callbacks.checkpoint.monitor,
         mode=cfg.callbacks.checkpoint.mode,
         save_top_k=cfg.callbacks.checkpoint.save_top_k,
+        save_last=True,
         dirpath=str(ckpt_dir)
     )
     lr_monitor = LearningRateMonitor(logging_interval=cfg.callbacks.lr_monitor.logging_interval)
@@ -84,27 +89,19 @@ def main(cfg):
     hparams = OmegaConf.to_container(cfg.model.hparams, resolve=True)
     model = model_cls(**hparams)
 
-        # 6) Trainer hardware args
-    if torch.cuda.is_available():
-        accel_kwargs = {'accelerator': 'gpu', 'devices': 1}
-    elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
-        accel_kwargs = {'accelerator': 'mps', 'devices': 1}
-    else:
-        accel_kwargs = {'accelerator': 'cpu', 'devices': 1}
-
-    # 7) Trainer
-    trainer = pl.Trainer(
-        logger=wandb_logger,
-        callbacks=[checkpoint_cb, lr_monitor],
-        max_epochs=cfg.trainer.max_epochs,
-        gradient_clip_val=cfg.trainer.gradient_clip_val,
-        precision=cfg.trainer.precision,
-        **accel_kwargs
+    # 6) Trainer
+    trainer = hydra.utils.instantiate(
+        cfg.trainer,
+        logger = wandb_logger,
+        callbacks = [checkpoint_cb, lr_monitor],
     )
 
     # 8) Fit & Test
-    trainer.fit(model, datamodule)
-    trainer.test(model, datamodule=datamodule)
+    try:
+        trainer.fit(model, datamodule)
+        trainer.test(model, datamodule=datamodule)
+    finally:
+        wandb.finish()
 
 if __name__ == '__main__':
     main()
