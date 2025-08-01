@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
 from typing import Optional
-from torchmetrics import Accuracy, AUROC, AveragePrecision, F1Score
+from torchmetrics import Accuracy, AUROC, AveragePrecision, F1Score, Recall
 
 
 from benchmark.models.dreams_classifier import DreamsClassifier
@@ -62,6 +62,13 @@ class LitClassifier(pl.LightningModule):
             self.val_auc   = AUROC(task="binary")
             self.val_pr    = AveragePrecision(task="binary")
             self.val_f1    = F1Score(task="binary")
+            self.val_recall = Recall(task="binary", threshold=0.5)
+
+            self.test_acc = Accuracy(task="binary", threshold=0.5)
+            self.test_auc = AUROC(task="binary")
+            self.test_pr = AveragePrecision(task="binary")
+            self.test_f1 = F1Score(task="binary")
+            self.test_recall = Recall(task="binary", threshold=0.5)
         else:
             self.train_acc = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
             self.val_acc   = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
@@ -103,10 +110,12 @@ class LitClassifier(pl.LightningModule):
             self.log('val_auc', self.val_auc(probs, y.long()), prog_bar=True)
             self.log('val_pr',  self.val_pr(probs, y.long()), prog_bar=True)
             self.log('val_f1',  self.val_f1(probs, y.long()), prog_bar=True)
+            self.log('val_recall', self.val_recall(preds, y.long()), prog_bar=True)
         if stage == 'test':
-            self.log('test_auc', self.val_auc(probs, y.long()), prog_bar=True)
-            self.log('test_pr', self.val_pr(probs, y.long()), prog_bar=True)
-            self.log('test_f1', self.val_f1(probs, y.long()), prog_bar=True)
+            self.log('test_auc', self.test_auc(probs, y.long()), prog_bar=True)
+            self.log('test_pr', self.test_pr(probs, y.long()), prog_bar=True)
+            self.log('test_f1', self.test_f1(probs, y.long()), prog_bar=True)
+            self.log('test_recall', self.test_recall(preds, y.long()), prog_bar=True)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -120,17 +129,17 @@ class LitClassifier(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=1e-5)
-        scheduler = OneCycleLR(
-            optimizer,
-            max_lr=self.hparams.lr,
-            total_steps=self.trainer.estimated_stepping_batches,
-            pct_start=0.1,
-            div_factor=10.0,
-            final_div_factor=100.0,
-        )
+        # scheduler = OneCycleLR(
+        #     optimizer,
+        #     max_lr=self.hparams.lr,
+        #     total_steps=self.trainer.estimated_stepping_batches,
+        #     pct_start=0.1,
+        #     div_factor=10.0,
+        #     final_div_factor=100.0,
+        # )
         return {
             'optimizer': optimizer,
-            'lr_scheduler': {'scheduler': scheduler, 'interval': 'step'}
+            # 'lr_scheduler': {'scheduler': scheduler, 'interval': 'step'}
         }
 
 
