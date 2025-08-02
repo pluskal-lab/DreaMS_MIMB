@@ -11,3 +11,5 @@ dependencies:
   - pip:
     - git+https://github.com/pluskal-lab/DreaMS.git
     - massspecgym
+    - hydra-core
+    - omegaconf
