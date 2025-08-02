@@ -12,7 +12,7 @@ data:
 
   transform:
     _target_: massspecgym.data.transforms.SpecTokenizer
-    n_peaks: 64
+    n_peaks: 100
 
   dataset:
     _target_: benchmark.data.datasets.BinaryDetectionDataset
@@ -23,8 +23,10 @@ data:
   datamodule:
     _target_: benchmark.data.data_module.BenchmarkDataModule
     dataset: ${data.dataset}
-    batch_size: 64
+    batch_size: 256
     num_workers: 0
+    persistent_workers: true
+
 
 # === Model Section ===
 model:
@@ -32,27 +34,29 @@ model:
   hparams:
     ckpt_path: data/model_checkpoints/ssl_model.ckpt
     num_classes: 2
-    n_highest_peaks: 64
-    lr: 1e-5
+    n_highest_peaks: 100
+    lr: 3e-5
     dropout: 0.1
     train_encoder: true
     use_focal: true
     gamma: 0.5
     alpha: 0.8
-    pos_weight: null
 
 # === Trainer Section ===
 trainer:
   _target_: pytorch_lightning.Trainer
-  max_epochs: 1
+  max_epochs: 10
   gradient_clip_val: 0.5
-  precision: 16     # mixed‐precision if hardware supports
+  accelerator: gpu
+  devices: 1
+  num_nodes: 1
+  strategy: auto
 
 # === Logger ===
 logger:
   # Hydra will call: WandbLogger(**this dict)
   _target_: pytorch_lightning.loggers.WandbLogger
-  project: PhantoMS_Retrieval
+  project: DreaMS_MIMB
   entity:  jozefov-iocb-prague
   name:    chlorine_experiment_01
   # pass the full config so you can see hyperparams in WandB
