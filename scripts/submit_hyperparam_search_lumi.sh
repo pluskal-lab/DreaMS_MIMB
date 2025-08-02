@@ -19,6 +19,6 @@ module load pytorch
 source /scratch/project_465002061/DreaMS_MIMB/dreams_mimb/bin/activate
 
 srun python scripts/train.py -m \
-  'model.hparams.train_encoder=[false,true]' \
-  'model.hparams.gamma=[0.0,0.5,1.0]' \
-  'model.hparams.alpha=[0.25,0.50,0.90]'
+  'model.hparams.train_encoder=false,true' \
+  'model.hparams.gamma=0.0,0.5,1.0' \
+  'model.hparams.alpha=0.25,0.5,0.90'
