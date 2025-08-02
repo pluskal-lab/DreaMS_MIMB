@@ -208,5 +208,7 @@ cython_debug/
 lightning_logs/
 *.ckpt
 /results/
-/output/
-/wandb/
+output/
+wandb/
+scripts/wandb/
+scripts/outputs/
