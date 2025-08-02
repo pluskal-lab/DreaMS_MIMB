@@ -1,21 +1,11 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 from dreams.api import PreTrainedModel
 from dreams.models.dreams.dreams import DreaMS as DreaMSModel
 
-import argparse, pathlib
-
-# allow argparse.Namespace and pathlib.PosixPath in safe unpickling
-torch.serialization.add_safe_globals([
-    argparse.Namespace,
-    pathlib.PosixPath,
-])
-
-
 class DreamsClassifier(nn.Module):
     """
-    Wraps DreaMS encoder and adds a classification head for N-way outputs.
+    Wraps DreaMS encoder and adds a classification head
     """
     def __init__(
         self,
@@ -27,28 +17,38 @@ class DreamsClassifier(nn.Module):
         train_encoder: bool = False,
     ):
         super().__init__()
-        # load DreaMS
+        # load DreaMS encoder
         self.spec_encoder = PreTrainedModel.from_ckpt(
             ckpt_path=ckpt_path,
             ckpt_cls=DreaMSModel,
             n_highest_peaks=n_highest_peaks,
         ).model
-        # freeze encoder if needed
+        # freeze encoder if desired
         for p in self.spec_encoder.parameters():
             p.requires_grad = train_encoder
-        # classification head
-        self.dropout = nn.Dropout(dropout)
-        self.num_classes = num_classes
+
         out_dim = 1 if num_classes == 2 else num_classes
-        self.lin_out = nn.Linear(embedding_dim, out_dim)
+        hidden_dims = [512, 512, 512, 256]
+        layers = []
+        prev_dim = embedding_dim
+        for hdim in hidden_dims:
+            layers += [
+                nn.Linear(prev_dim, hdim),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+            ]
+            prev_dim = hdim
+        # final projection
+        layers.append(nn.Linear(prev_dim, out_dim))
+
+        self.classifier = nn.Sequential(*layers)
+        self.num_classes = num_classes
 
     def forward(self, spec: torch.Tensor) -> torch.Tensor:
         # spec: [B, peaks, 2]
-        x = self.spec_encoder(spec)[:, 0, :]  # [B, emb]
-        x = self.dropout(x)
-        out = self.lin_out(x)
-        # collapse last dim for binary
-        return out.squeeze(-1)
+        x = self.spec_encoder(spec)[:, 0, :]  # [B, embedding_dim]
+        logits = self.classifier(x)
+        return logits.squeeze(-1)  # collapse to [B] for binary
 
 
 # class DreamsClassifier(nn.Module):
