@@ -1,0 +1,49 @@
+{
+    "os": "macOS-15.5-arm64-arm-64bit",
+    "python": "3.11.13",
+    "heartbeatAt": "2025-07-30T08:02:48.597289",
+    "startedAt": "2025-07-30T08:02:45.242211",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/macbook/CODE/DreaMS_MIMB/scripts/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "scripts/train.py",
+    "git": {
+        "remote": "git@github.com:Jozefov/DreaMS_MIMB.git",
+        "commit": "aba099877efb11ad0f72caea38387b47da0794ce"
+    },
+    "email": "mn.mastaf@gmail.com",
+    "root": "/Users/macbook/CODE/DreaMS_MIMB",
+    "host": "MacBook--MacBook-Pro.local",
+    "username": "macbook",
+    "executable": "/Users/macbook/UTILS/anaconda3/envs/dreams_mimb/bin/python",
+    "cpu_count": 10,
+    "cpu_count_logical": 10,
+    "cpu_freq": {
+        "current": 3228,
+        "min": 600,
+        "max": 3228
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3228,
+            "min": 600,
+            "max": 3228
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 926.3517189025879,
+            "used": 606.2052574157715
+        }
+    },
+    "gpuapple": {
+        "type": "Apple M1 Max",
+        "vendor": "sppci_vendor_Apple"
+    },
+    "memory": {
+        "total": 32.0
+    }
+}
