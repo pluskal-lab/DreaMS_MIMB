@@ -20,15 +20,12 @@ from datetime import datetime
 
 import hydra
 from omegaconf import OmegaConf
-import torch
-import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
 
 import wandb
 
 from benchmark.data.datasets import BinaryDetectionDataset
-from benchmark.data.data_module import BenchmarkDataModule
 from benchmark.models import MODEL_REGISTRY
 
 @hydra.main(config_path="../configs", config_name="test_config")
@@ -49,13 +46,17 @@ def main(cfg):
     )
 
     # 2) Callbacks
-    ckpt_dir = PROJECT_ROOT / cfg.callbacks.checkpoint.dirpath
+    ckpt_base = PROJECT_ROOT / cfg.callbacks.checkpoint.dirpath
+    ckpt_run_folder = ckpt_base / run_name
+    ckpt_run_folder.mkdir(parents=True, exist_ok=True)
+
     checkpoint_cb = ModelCheckpoint(
-        monitor=cfg.callbacks.checkpoint.monitor,
-        mode=cfg.callbacks.checkpoint.mode,
-        save_top_k=cfg.callbacks.checkpoint.save_top_k,
-        save_last=True,
-        dirpath=str(ckpt_dir)
+            dirpath = str(ckpt_run_folder),
+            filename = f"{run_name}" + "-{epoch:02d}-{val_loss:.4f}",
+            monitor = cfg.callbacks.checkpoint.monitor,
+            mode = cfg.callbacks.checkpoint.mode,
+            save_top_k = cfg.callbacks.checkpoint.save_top_k,
+            save_last = True,
     )
     lr_monitor = LearningRateMonitor(logging_interval=cfg.callbacks.lr_monitor.logging_interval)
 
