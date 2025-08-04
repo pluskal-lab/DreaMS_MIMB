@@ -8,6 +8,7 @@ dependencies:
   - jupyterlab
   - ipywidgets
   - notebook
+  - pytorch>=2.2.1
   - pip:
     - git+https://github.com/pluskal-lab/DreaMS.git
     - massspecgym
