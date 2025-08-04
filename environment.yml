@@ -64,6 +64,3 @@ dependencies:
     - torch-geometric==2.5.3
     - tokenizers==0.19.1
     - huggingface-hub==0.24.5
-    - "--no-deps"
-    - git+https://github.com/pluskal-lab/DreaMS.git
-    - massspecgym
