@@ -45,13 +45,13 @@ dependencies:
   - seaborn=0.13.2
   - plotly
   - ase=3.22.1
-  - pyopenms
   - hydra-core
   - omegaconf
 
   # pip-only (no-deps) installs
   - pip:
     - igraph==0.11.4
+    - pyopenms
     - molplotly==1.1.7
     - wandb==0.17.0
     - matchms==0.26.2
