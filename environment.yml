@@ -43,9 +43,9 @@ dependencies:
   - rdkit=2023.9.5
   - umap-learn=0.5.6
   - seaborn=0.13.2
-  - plotly=5.20.0
+  - plotly
   - ase=3.22.1
-  - pyopenms=3.0.0
+  - pyopenms
   - hydra-core
   - omegaconf
 
