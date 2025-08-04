@@ -1,16 +1,70 @@
+#name: dreams_mimb
+#channels:
+#  - conda-forge
+#  - defaults
+#dependencies:
+#  - python=3.11
+#  - pip
+#  - jupyterlab
+#  - ipywidgets
+#  - notebook
+#  - pytorch==2.3.0
+#  - pip:
+#    - git+https://github.com/pluskal-lab/DreaMS.git
+#    - massspecgym
+#    - hydra-core
+#    - omegaconf
+
 name: dreams_mimb
 channels:
   - conda-forge
   - defaults
 dependencies:
+  # core
   - python=3.11
   - pip
   - jupyterlab
-  - ipywidgets
   - notebook
-  - pytorch==2.3.0
+  - ipywidgets
+
+  # shared libraries (highest‐needed version)
+  - numpy=1.24.4
+  - numba=0.57.1
+  - pytorch=2.3.0          # satisfies MassSpecGym
+  - pytorch-lightning=2.2.5
+  - torchmetrics=1.4.0
+  - pandas=2.2.1
+  - pyarrow=15.0.2
+  - h5py=3.11.0
+  - rdkit=2023.9.5
+  - umap-learn=0.5.6
+  - seaborn=0.13.2
+  - plotly=5.20.0
+  - ase=3.22.1
+  - wandb=0.17.0
+  - pandarallel=1.6.5
+  - matchms=0.26.2
+  - pyopenms=3.0.0
+  - igraph=0.11.4
+  - molplotly=1.1.7
+  - fire=0.6.0
+  - huggingface-hub=0.24.5
+
+  # MassSpecGym-only extras
+  - torch-geometric=2.5.3
+  - tokenizers=0.19.1
+  - myopic-mces=1.0.0
+  - chemparse=0.3.1
+  - chemformula=1.3.1
+  - networkx=3.3
+  - selfies=2.1.2
+  - pulp=2.9.0
+
+  # extras
+  - hydra-core
+  - omegaconf
+
+  # finally: install the two packages **without** pulling in their own deps
   - pip:
-    - git+https://github.com/pluskal-lab/DreaMS.git
-    - massspecgym
-    - hydra-core
-    - omegaconf
+    - "git+https://github.com/pluskal-lab/DreaMS.git --no-deps"
+    - "massspecgym --no-deps"
