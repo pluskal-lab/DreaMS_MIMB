@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+eval "$(conda shell.bash hook)"
+
 # (optional—to silence the "defaults" warning)
 conda config --add channels defaults
 
