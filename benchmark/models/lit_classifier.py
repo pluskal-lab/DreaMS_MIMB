@@ -59,16 +59,16 @@ class LitClassifier(pl.LightningModule):
         if self.hparams.num_classes == 2:
             self.train_acc = Accuracy(task="binary", threshold=0.5)
             self.val_acc   = Accuracy(task="binary", threshold=0.5)
-            self.val_auc   = AUROC(task="binary")
-            self.val_pr    = AveragePrecision(task="binary")
-            self.val_f1    = F1Score(task="binary")
-            self.val_recall = Recall(task="binary", threshold=0.5)
+            self.val_auc   = AUROC(task="binary", on_step=False, on_epoch=True)
+            self.val_pr    = AveragePrecision(task="binary", on_step=False, on_epoch=True)
+            self.val_f1    = F1Score(task="binary", on_step=False, on_epoch=True)
+            self.val_recall = Recall(task="binary", threshold=0.5, on_step=False, on_epoch=True)
 
-            self.test_acc = Accuracy(task="binary", threshold=0.5)
-            self.test_auc = AUROC(task="binary")
-            self.test_pr = AveragePrecision(task="binary")
-            self.test_f1 = F1Score(task="binary")
-            self.test_recall = Recall(task="binary", threshold=0.5)
+            self.test_acc = Accuracy(task="binary", threshold=0.5, on_step=False, on_epoch=True)
+            self.test_auc = AUROC(task="binary", on_step=False, on_epoch=True)
+            self.test_pr = AveragePrecision(task="binary", on_step=False, on_epoch=True)
+            self.test_f1 = F1Score(task="binary", on_step=False, on_epoch=True)
+            self.test_recall = Recall(task="binary", threshold=0.5, on_step=False, on_epoch=True)
         else:
             self.train_acc = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
             self.val_acc   = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
@@ -104,14 +104,16 @@ class LitClassifier(pl.LightningModule):
             probs = F.softmax(logits, dim=-1)
             preds = torch.argmax(probs, dim=-1)
         self.log(f"{stage}_loss", loss, prog_bar=(stage!='train'))
-        acc = self.train_acc if stage=='train' else self.val_acc
-        self.log(f"{stage}_acc", acc(probs if self.hparams.num_classes>2 else preds, y.long()), prog_bar=True)
+        if stage == 'train':
+            self.log('train_acc', self.train_acc(preds, y.long()), prog_bar=True)
         if stage == 'val':
+            self.log('val_acc', self.val_acc(preds, y.long()), prog_bar=True)
             self.log('val_auc', self.val_auc(probs, y.long()), prog_bar=True)
             self.log('val_pr',  self.val_pr(probs, y.long()), prog_bar=True)
             self.log('val_f1',  self.val_f1(probs, y.long()), prog_bar=True)
             self.log('val_recall', self.val_recall(preds, y.long()), prog_bar=True)
         if stage == 'test':
+            self.log('test_acc', self.test_acc(preds, y.long()), prog_bar=True)
             self.log('test_auc', self.test_auc(probs, y.long()), prog_bar=True)
             self.log('test_pr', self.test_pr(probs, y.long()), prog_bar=True)
             self.log('test_f1', self.test_f1(probs, y.long()), prog_bar=True)
