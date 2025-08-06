@@ -107,7 +107,7 @@ class DreamsClassifier(nn.Module):
             p.requires_grad = train_encoder
 
         # 2) build classification head
-        hidden_dims = [512, 512, 512, 256]
+        hidden_dims = [1024, 1024, 1024, 256]
         self.layers = nn.ModuleList()
         prev_dim = embedding_dim
         for hdim in hidden_dims:
