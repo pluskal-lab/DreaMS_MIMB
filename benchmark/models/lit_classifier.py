@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
 from typing import Optional
-from torchmetrics import Accuracy, AUROC, AveragePrecision, F1Score, Recall
+from torchmetrics import Accuracy, AUROC, AveragePrecision, F1Score, Recall, Precision
 
 
 from benchmark.models.dreams_classifier import DreamsClassifier
@@ -41,6 +41,12 @@ class LitClassifier(pl.LightningModule):
             dropout=self.hparams.dropout,
             train_encoder=self.hparams.train_encoder,
         )
+
+        print(self.hparams.ckpt_path)
+        print(self.hparams.n_highest_peaks)
+        print(self.hparams.dropout)
+        print(self.hparams.train_encoder)
+        print(self.hparams.use_focal)
         # loss
         if self.hparams.use_focal:
             self.criterion = FocalLoss(
@@ -57,23 +63,33 @@ class LitClassifier(pl.LightningModule):
                 self.criterion = nn.CrossEntropyLoss()
         # metrics
         if self.hparams.num_classes == 2:
-            self.train_acc = Accuracy(task="binary", threshold=0.5)
-            self.val_acc   = Accuracy(task="binary", threshold=0.5)
-            self.val_auc   = AUROC(task="binary", on_step=False, on_epoch=True)
-            self.val_pr    = AveragePrecision(task="binary", on_step=False, on_epoch=True)
-            self.val_f1    = F1Score(task="binary", on_step=False, on_epoch=True)
-            self.val_recall = Recall(task="binary", threshold=0.5, on_step=False, on_epoch=True)
+            # threshold‐based (Accuracy, Precision, F1, Recall) will apply their own 0.5 cutoff
+            self.train_acc     = Accuracy(task="binary", threshold=0.5)
+            self.train_prec    = Precision(task="binary", threshold=0.5)
+            self.train_f1      = F1Score(task="binary", threshold=0.5)
+            self.train_recall  = Recall(task="binary", threshold=0.5)
+            # score‐based (AUC, AP)
+            self.train_auc     = AUROC(task="binary")
+            self.train_avg_pr  = AveragePrecision(task="binary")
 
-            self.test_acc = Accuracy(task="binary", threshold=0.5, on_step=False, on_epoch=True)
-            self.test_auc = AUROC(task="binary", on_step=False, on_epoch=True)
-            self.test_pr = AveragePrecision(task="binary", on_step=False, on_epoch=True)
-            self.test_f1 = F1Score(task="binary", on_step=False, on_epoch=True)
-            self.test_recall = Recall(task="binary", threshold=0.5, on_step=False, on_epoch=True)
+            self.val_acc       = Accuracy(task="binary", threshold=0.5)
+            self.val_prec      = Precision(task="binary", threshold=0.5)
+            self.val_f1        = F1Score(task="binary", threshold=0.5)
+            self.val_recall    = Recall(task="binary", threshold=0.5)
+            self.val_auc       = AUROC(task="binary")
+            self.val_avg_pr    = AveragePrecision(task="binary")
+
+            self.test_acc      = Accuracy(task="binary", threshold=0.5)
+            self.test_prec     = Precision(task="binary", threshold=0.5)
+            self.test_f1       = F1Score(task="binary", threshold=0.5)
+            self.test_recall   = Recall(task="binary", threshold=0.5)
+            self.test_auc      = AUROC(task="binary")
+            self.test_avg_pr   = AveragePrecision(task="binary")
         else:
             self.train_acc = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
             self.val_acc   = Accuracy(task="multiclass", num_classes=self.hparams.num_classes)
             self.val_auc   = AUROC(task="multiclass", num_classes=self.hparams.num_classes)
-            self.val_pr    = AveragePrecision(task="multiclass", num_classes=self.hparams.num_classes, average="macro")
+            self.val_avg_pr    = AveragePrecision(task="multiclass", num_classes=self.hparams.num_classes, average="macro")
             self.val_f1    = F1Score(task="multiclass", num_classes=self.hparams.num_classes, average="macro")
 
     def forward(self, spec: torch.Tensor) -> torch.Tensor:
@@ -96,28 +112,27 @@ class LitClassifier(pl.LightningModule):
                 loss = self.criterion(logits, y)
             else:
                 loss = self.criterion(logits, y.long())
+
         # predictions & logging
         if self.hparams.num_classes == 2:
             probs = torch.sigmoid(logits)
-            preds = (probs > 0.5).float()
         else:
             probs = F.softmax(logits, dim=-1)
-            preds = torch.argmax(probs, dim=-1)
-        self.log(f"{stage}_loss", loss, prog_bar=(stage!='train'))
-        if stage == 'train':
-            self.log('train_acc', self.train_acc(preds, y.long()), prog_bar=True)
-        if stage == 'val':
-            self.log('val_acc', self.val_acc(preds, y.long()), prog_bar=True)
-            self.log('val_auc', self.val_auc(probs, y.long()), prog_bar=True)
-            self.log('val_pr',  self.val_pr(probs, y.long()), prog_bar=True)
-            self.log('val_f1',  self.val_f1(probs, y.long()), prog_bar=True)
-            self.log('val_recall', self.val_recall(preds, y.long()), prog_bar=True)
-        if stage == 'test':
-            self.log('test_acc', self.test_acc(preds, y.long()), prog_bar=True)
-            self.log('test_auc', self.test_auc(probs, y.long()), prog_bar=True)
-            self.log('test_pr', self.test_pr(probs, y.long()), prog_bar=True)
-            self.log('test_f1', self.test_f1(probs, y.long()), prog_bar=True)
-            self.log('test_recall', self.test_recall(preds, y.long()), prog_bar=True)
+
+        self.log(f"{stage}_loss", loss, prog_bar=(stage != 'train'))
+
+        if self.hparams.num_classes == 2:
+            m = {
+                'acc': getattr(self, f"{stage}_acc"),
+                'prec': getattr(self, f"{stage}_prec"),
+                'f1': getattr(self, f"{stage}_f1"),
+                'recall': getattr(self, f"{stage}_recall"),
+                'auc': getattr(self, f"{stage}_auc"),
+                'avg_pr': getattr(self, f"{stage}_avg_pr"),
+            }
+            for name, metric in m.items():
+                self.log(f"{stage}_{name}", metric(probs, y.long()),
+                         prog_bar=(name in ('acc', 'auc')), on_step=False, on_epoch=True)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -130,6 +145,7 @@ class LitClassifier(pl.LightningModule):
         return self.step(batch, 'test')
 
     def configure_optimizers(self):
+        print(self.hparams.lr)
         optimizer = AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=1e-5)
         # scheduler = OneCycleLR(
         #     optimizer,
