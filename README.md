@@ -131,7 +131,7 @@ You are simply downloading all the resources and code needed for this tutorial.
 
 **Confirm Conda is working**
 
-**First, make sure you’re using the terminal in the same folder as the previous step (the DreaMS_MIMB folder)**. If you closed your terminal, just open a new one and use cd to enter your project folder again.
+**First, make sure you’re using the terminal in the same folder as the previous step (the DreaMS_MIMB folder)**. If you closed your terminal, just open a new one and use `cd` to enter your project folder again.
 
 To check that Conda is installed and working, type:
 ```bash
@@ -140,15 +140,14 @@ conda --version
 
 If you see the version number, proceed! If not, [go back to Step 1](#step1).
 
-1. **Create the Conda Environment**  
-   Now you’ll set up a dedicated workspace for this project, with all the right tools and libraries. In your terminal, type:
+1. **Install all packages and set up the environment**  
+   Instead of manually creating an environment from `environment.yml`, we provide a script that installs all dependencies, resolves conflicts, and prepares the correct environment automatically.
 
     ```bash
-    conda env create -f environment.yml
+    bash scripts/install_env.sh
     ```
-   This command will automatically install everything needed for the tutorial.
-
-2. **Activate the Environment**
+   This command creates a Conda environment named `dreams_mimb`, install all required Python packages.
+2. **Activate the environment**
 	
 	Next, activate your new workspace with:
     ```bash
@@ -158,7 +157,15 @@ If you see the version number, proceed! If not, [go back to Step 1](#step1).
 	- By “activating” the environment, you make sure that any commands you run will use the correct versions of Python and all necessary libraries, without interfering with other projects or programs on your computer.
     - You’ll need to activate this environment every time you open a new terminal and want to work on this project.
 
-If you see errors about “conda command not found,” make sure you have Conda installed and restart your terminal.
+    If you see errors about “conda command not found,” make sure you have Conda installed and restart your terminal.
+
+3. **Download the data assets**
+
+   We provide a script to fetch all necessary datasets and place them in the correct directories:
+    ```bash
+    python scripts/download_assets.py
+    ```
+   - After this step, your data/ folder will contain all resources needed for the tutorials.
 
 ---
 
@@ -177,9 +184,15 @@ jupyter lab
 
 - After a few seconds, your default web browser will open automatically.
 If not, copy and paste the link from your terminal into your browser.
+
+
+<p align="center">
+  <img src="assets/DreaMS_MIMB_jupyter_setup.jpg" alt="JupyterLab setup — DreaMS_MIMB" width="500">
+</p>
+
+
 - You’ll see a file browser, navigate into the notebooks folder on the left side.
-- Start with `1_data_preparation.ipynb` and proceed step by step.  
-  **TODO:** Add screenshot of browser interface and notebooks folder!
+- Start with `1_data_preparation.ipynb` and proceed step by step.
 
 **(B) Classic Jupyter notebook (if you prefer):**
 
@@ -292,7 +305,8 @@ This project was developed as a companion to the DreaMS book chapter, designed f
 ```bash
 git clone https://github.com/Jozefov/DreaMS_MIMB.git
 cd DreaMS_MIMB
-conda env create -f environment.yml
+bash install_env.sh
 conda activate dreams_mimb
+python scripts/download_assets.py
 jupyter lab
 ```
