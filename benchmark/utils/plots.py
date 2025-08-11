@@ -4,7 +4,90 @@ import seaborn as sns
 from cycler import cycler
 import numpy as np
 from scipy.stats import gaussian_kde
+from rdkit.Chem import Draw
+from IPython.display import display, SVG
+from rdkit import Chem
+import re
 
+def plot_molecule_pair(
+    smiles_left: str | None,
+    smiles_right: str | None,
+    legends=("Query", "Library"),
+    size=(300, 300),
+    dreams_sim: float | None = None,
+    cosine_sim: float | None = None,
+    tanimoto: float | None = None,
+    header_loc: str = "top-left",  # "top-left" | "top-right"
+):
+    """
+    Render two SMILES side-by-side and overlay DreaMS / Cosine / Tanimoto text on the SVG.
+    """
+    left_mol  = Chem.MolFromSmiles(smiles_left)  if smiles_left  else None
+    right_mol = Chem.MolFromSmiles(smiles_right) if smiles_right else None
+
+    if not (left_mol and right_mol):
+        # Graceful fallback
+        if left_mol:  display(left_mol)
+        if right_mol: display(right_mol)
+        return
+
+    img = Draw.MolsToGridImage(
+        [left_mol, right_mol],
+        molsPerRow=2,
+        subImgSize=size,
+        legends=list(legends),
+        useSVG=True
+    )
+
+    # Get SVG text
+    svg = img.data if hasattr(img, "data") else str(img)
+
+    # Build the metrics text
+    parts = []
+    if dreams_sim is not None:  parts.append(f"DreaMS {dreams_sim:.2f}")
+    if cosine_sim is not None:  parts.append(f"Cosine {cosine_sim:.2f}")
+    if tanimoto is not None:    parts.append(f"Tanimoto {tanimoto:.2f}")
+    header_text = "  |  ".join(parts)
+
+    if header_text:
+        # Parse width/height for positioning
+        m_w = re.search(r'width="(\d+)', svg)
+        m_h = re.search(r'height="(\d+)', svg)
+        W = int(m_w.group(1)) if m_w else 600
+        H = int(m_h.group(1)) if m_h else 300
+
+        # Anchor positions
+        padding = 8
+        text_y  = 22              # from top
+        if header_loc == "top-left":
+            text_x = 10
+        else:  # top-right
+            # rough width estimate for background box
+            est_text_px = 8 * len(header_text)  # ~8px per char
+            text_x = max(W - est_text_px - 20, 10)
+
+        # Background box (slight translucency), then text
+        bg_w = max(8 * len(header_text) + 2 * padding, 120)
+        bg_h = 24 + padding
+        bg_x = max(text_x - padding, 0)
+        bg_y = max(text_y - 18, 0)
+
+        overlay = (
+            f'<g id="metrics_overlay">'
+            f'<rect x="{bg_x}" y="{bg_y}" width="{bg_w}" height="{bg_h}" '
+            f'fill="white" opacity="0.7" stroke="none"/>'
+            f'<text x="{text_x}" y="{text_y}" font-size="14" '
+            f'font-family="DejaVu Sans, Arial, Helvetica" fill="black">{header_text}</text>'
+            f'</g>'
+        )
+
+        # Insert overlay just before closing </svg> so it’s drawn on top
+        insert_at = svg.rfind("</svg>")
+        if insert_at == -1:
+            insert_at = len(svg)
+        svg = svg[:insert_at] + overlay + svg[insert_at:]
+
+    display(SVG(svg))
 
 def get_nature_hex_colors(extended: bool = True) -> list[str]:
     """
