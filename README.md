@@ -86,7 +86,7 @@ If you see an error, install Miniconda first.
     Type these commands in the terminal:
     
     ```bash
-    git clone https://github.com/Jozefov/DreaMS_MIMB.git
+    git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
     cd DreaMS_MIMB
     ```
    This downloads all the files and code you will need for the tutorial into a folder called DreaMS_MIMB.
@@ -300,7 +300,7 @@ This project was developed as a companion to the DreaMS book chapter, designed f
 <h2 id="quick-setup"> Minimal setup commands (for quick copy-paste)</h2>
 
 ```bash
-git clone https://github.com/Jozefov/DreaMS_MIMB.git
+git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
 cd DreaMS_MIMB
 bash install_env.sh
 conda activate dreams_mimb
