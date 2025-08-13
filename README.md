@@ -1,9 +1,6 @@
 # DreaMS_MIMB
 
-TODO this text redo
-
-A step-by-step tutorial and reproducible environment for working with the DreaMS large foundation model for mass spectrometry.  
-This project guides you through the full workflow—from data preparation, through model fine-tuning, to advanced investigation—with annotated Jupyter Notebooks, explained for absolute beginners.
+This repository is the hands-on companion to the book chapter *Using Foundational Models for Mass Spectrometry*. It includes ready-to-run Jupyter notebooks, datasets, and pretrained models for [DreaMS](https://www.nature.com/articles/s41587-025-02663-3) and [MassSpecGym](https://arxiv.org/abs/2410.23326). You can follow the complete workflow, from preparing and deduplicating spectra to matching them in spectral libraries and fine-tuning models. The tutorials match the chapter’s examples and are easy to follow for both beginners and experienced researchers. Everything comes with installation scripts so you can set up the environment quickly and adapt the methods to your own data.
 
 ---
 
