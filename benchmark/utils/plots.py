@@ -4,10 +4,18 @@ import seaborn as sns
 from cycler import cycler
 import numpy as np
 from scipy.stats import gaussian_kde
-from rdkit.Chem import Draw
+from rdkit.Chem import Draw, AllChem
+from rdkit.Chem.Draw import rdMolDraw2D
 from IPython.display import display, SVG
 from rdkit import Chem
 import re
+from pathlib import Path
+from typing import Tuple
+
+import dreams.utils.plots as dplots
+import dreams.utils.spectra as su
+
+
 
 def plot_molecule_pair(
     smiles_left: str | None,
@@ -245,3 +253,118 @@ def plot_dissimilarity_hist_kde(sim_mat: np.ndarray, figsize=(6, 4), bins=20, hi
     ax.legend()
     plt.tight_layout()
     plt.show()
+
+
+def set_project_root(project_root: Path | str) -> None:
+    """
+    Point DreaMS plotting utils to your repo root so figures land under
+    <PROJECT_ROOT>/misc/figures/..., not site-packages.
+    """
+    dplots.PROJECT_ROOT = Path(project_root)
+
+def _figure_path(rel: str) -> Path:
+    """
+    Return absolute path under <PROJECT_ROOT>/misc/figures/<rel> and ensure parent exists.
+
+    Example:
+        _figure_path('figs/Fig2A_spectrum.svg')
+        -> <PROJECT_ROOT>/misc/figures/figs/Fig2A_spectrum.svg
+    """
+    base = Path(getattr(dplots, "PROJECT_ROOT", Path.cwd()))
+    p = base / "misc" / "figures" / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+def export_spectrum(msdata, i: int, rel_pth: str, **plot_kwargs) -> str:
+    """
+    Save a single spectrum using the SAME su.plot_spectrum function.
+
+    Args:
+        msdata: MSData-like object with .get_spectra(i) and .get_prec_mzs(i)
+        i: index within msdata
+        rel_pth: path relative to <PROJECT_ROOT>/misc/figures (e.g., 'figs/Fig2A_spectrum.svg')
+        **plot_kwargs: forwarded to su.plot_spectrum (e.g., figsize, colors, xlim, etc.)
+
+    Returns:
+        Absolute path to the saved file as str.
+    """
+    abs_out = _figure_path(rel_pth)
+    spec = msdata.get_spectra(i)
+    prec = msdata.get_prec_mzs(i)
+    su.plot_spectrum(
+        spec,
+        prec_mz=prec,
+        save_pth=str(abs_out),   # pass ABSOLUTE so su.save_fig writes exactly here
+        **plot_kwargs
+    )
+    return str(abs_out)
+
+def export_molecule(
+    msdata,
+    i: int,
+    rel_pth: str,
+    smiles_col: str = "smiles",
+    width: int = 800,
+    height: int = 600
+) -> str:
+    """
+    Save an RDKit depiction of the molecule at index i.
+    Use '.svg' for vector suitable for Illustrator.
+
+    Args:
+        msdata: MSData-like object with .get_values(col, i)
+        i: index within msdata
+        rel_pth: path relative to <PROJECT_ROOT>/misc/figures (e.g., 'figs/Fig2A_molecule.svg')
+        smiles_col: exact column name holding SMILES (e.g., 'smiles')
+        width, height: canvas size in pixels
+
+    Returns:
+        Absolute path to the saved file as str.
+    """
+    out = _figure_path(rel_pth)
+
+    smi = msdata.get_values(smiles_col, i)
+    if isinstance(smi, (bytes, bytearray)):
+        smi = smi.decode("utf-8", errors="ignore")
+    if not smi:
+        raise ValueError(f'No SMILES in column "{smiles_col}" at index {i}.')
+
+    mol = Chem.MolFromSmiles(str(smi))
+    if mol is None:
+        raise ValueError(f'RDKit could not parse SMILES "{smi}" at index {i}.')
+    AllChem.Compute2DCoords(mol)
+
+    if out.suffix.lower() == ".svg":
+        d2d = rdMolDraw2D.MolDraw2DSVG(width, height)
+        d2d.drawOptions().clearBackground = False  # cleaner for Illustrator
+        d2d.DrawMolecule(mol)
+        d2d.FinishDrawing()
+        out.write_text(d2d.GetDrawingText(), encoding="utf-8")
+    else:
+        from rdkit.Chem.Draw import MolToImage
+        img = MolToImage(mol, size=(width, height))
+        img.save(str(out), dpi=(600, 600))
+    return str(out)
+
+def export_spectra_mol(
+    msdata,
+    i: int,
+    basename: str = "Fig2A",
+    spec_rel_dir: str = "figs",
+    mol_rel_dir: str = "figs",
+    spec_ext: str = "svg",
+    mol_ext: str = "svg",
+    smiles_col: str = "smiles",
+    **plot_kwargs
+) -> Tuple[str, str]:
+    """
+    Convenience: save spectrum + molecule with matching names.
+
+    Returns:
+        (abs_spectrum_path, abs_molecule_path)
+    """
+    spec_rel = f"{spec_rel_dir}/{basename}_spectrum.{spec_ext}"
+    mol_rel  = f"{mol_rel_dir}/{basename}_molecule.{mol_ext}"
+    spec_path = export_spectrum(msdata, i, spec_rel, **plot_kwargs)
+    mol_path  = export_molecule(msdata, i, mol_rel, smiles_col=smiles_col)
+    return spec_path, mol_path
