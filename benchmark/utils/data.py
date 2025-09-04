@@ -10,6 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 import dreams.utils.spectra as su
 from dreams.definitions import SPECTRUM, PRECURSOR_MZ
+from dreams.utils.spectra import unpad_peak_list
+
 
 from typing import Dict, List, Optional, Sequence, Set, Tuple, Any
 
@@ -58,8 +60,53 @@ def build_query_knn_graph(embs_q: np.ndarray, k: int, thld: float) -> nx.Graph:
     return G
 
 
+# def annotate_edges_modcos_qq(G: nx.Graph, msdata_q, mz_tolerance: float = 0.05) -> None:
+#     """Rename weight->DreaMS_similarity and compute modified cosine for Q-Q edges."""
+#     cos_sim_pl = su.PeakListModifiedCosine(mz_tolerance=mz_tolerance)
+#     for u, v, d in G.edges(data=True):
+#         if "weight" in d:
+#             d["DreaMS_similarity"] = float(d["weight"])
+#             del d["weight"]
+#         d["edge_type"] = "Q-Q"
+#         try:
+#             mc = cos_sim_pl(
+#                 spec1=msdata_q[SPECTRUM][u], prec_mz1=msdata_q[PRECURSOR_MZ][u],
+#                 spec2=msdata_q[SPECTRUM][v], prec_mz2=msdata_q[PRECURSOR_MZ][v],
+#             )
+#             if isinstance(mc, (int, float)) and np.isfinite(float(mc)):
+#                 d["modified_cosine_similarity"] = float(mc)
+#         except Exception:
+#             pass
+
 def annotate_edges_modcos_qq(G: nx.Graph, msdata_q, mz_tolerance: float = 0.05) -> None:
-    """Rename weight->DreaMS_similarity and compute modified cosine for Q-Q edges."""
+    """
+    Add node/edge info for Cytoscape:
+      - Nodes (queries): copy all scalar-safe msdata_q fields into node attrs; set a fallback 'label'.
+      - Edges (Q–Q): 'DreaMS_similarity', set 'edge_type'='Q-Q', compute and store 'modified_cosine_similarity'.
+    """
+    # --- 1) node attributes (query nodes) ---
+    for u, d in G.nodes(data=True):
+        # only attach for query nodes that map to msdata_q row indices
+        if d.get("node_type", "query") != "query":
+            continue
+        if not isinstance(u, int) or u < 0 or u >= len(msdata_q):
+            continue
+
+        # pull row without plotting payloads
+        try:
+            row = msdata_q.at(u, plot_spec=False, plot_mol=False)
+        except Exception:
+            row = {}
+
+        # attach scalar-safe attrs from whatever columns exist
+        for k, v in row.items():
+            _assign_scalar_attr(d, k, v)
+
+        # ensure a readable label (generic, column-agnostic)
+        if "label" not in d or not isinstance(d["label"], str) or not d["label"]:
+            _assign_scalar_attr(d, "label", d.get("id", f"Q_{u}"))
+
+    # --- 2) edge annotations (Q–Q) ---
     cos_sim_pl = su.PeakListModifiedCosine(mz_tolerance=mz_tolerance)
     for u, v, d in G.edges(data=True):
         if "weight" in d:
@@ -295,3 +342,97 @@ def annotate_mgf_with_label(
 
     # Save back out
     save_as_mgf(specs, str(output_mgf))
+
+def find_lsh_diverse_index(
+    msdata,
+    hashes: np.ndarray,
+    cluster_size: int = 5,
+    delta_mz: float = 10.0,
+    count_nan_as_category: bool = True,
+    require_multi_instrument: bool = True,
+    require_multi_energy: bool = True,
+    return_details: bool = False,
+) -> Any:
+    """
+    Return index `i` into `lsh_counts[lsh_counts==cluster_size].index` of the first cluster that:
+    same INCHIKEY, ≥2 instruments, ≥2 energies, and ≥1 spectrum with max(m/z) ≥ precursor+delta_mz.
+    """
+    # candidate clusters (keep pandas ordering) + silence future warning by inferring index objects
+    lsh_counts = pd.Series(hashes).value_counts()
+    try:
+        lsh_counts.index = lsh_counts.index.infer_objects()
+    except Exception:
+        pass
+    target_hashes = lsh_counts[lsh_counts == cluster_size].index
+
+    # preload columns
+    inchis_all = np.asarray(msdata.get_values("INCHIKEY"), dtype=object)
+    inst_all   = np.asarray(msdata.get_values("INSTRUMENT_TYPE"), dtype=object)
+    ce_all     = np.asarray(msdata.get_values("COLLISION_ENERGY"), dtype=object)
+    prec_all   = np.asarray(msdata.get_values("precursor_mz"), dtype=float)
+
+    def _norm_labels(arr: np.ndarray) -> pd.Series:
+        out: List[object] = []
+        for x in arr:
+            if isinstance(x, bytes):
+                x = x.decode("utf-8", errors="ignore")
+            if x is None:
+                out.append(np.nan)
+            elif isinstance(x, str):
+                t = x.strip()
+                out.append(np.nan if (t == "" or t.lower() == "nan") else t)
+            else:
+                out.append(x)
+        return pd.Series(out, dtype=object)
+
+    def _norm_energy(s: pd.Series) -> pd.Series:
+        return s.map(lambda x: np.nan if (isinstance(x, str) and x.strip().lower() == "nan") else x)
+
+    def _has_heavy_peak(idxs: List[int], delta: float) -> bool:
+        for j in idxs:
+            j = int(j)
+            prec = prec_all[j]
+            if not np.isfinite(prec):
+                continue
+            pl = unpad_peak_list(msdata.get_spectra()[j])  # (2, n_peaks)
+            if pl.shape[1] and float(pl[0].max()) >= float(prec) + float(delta):
+                return True
+        return False
+
+    dropna_flag = not count_nan_as_category
+    chosen_pos: Optional[int] = None
+
+    for pos, h in enumerate(target_hashes):
+        idx_tmp = np.where(hashes == h)[0]
+        ilist = idx_tmp.tolist()
+
+        if pd.Series(inchis_all[ilist], dtype=object).nunique(dropna=True) != 1:
+            continue
+        if require_multi_instrument and _norm_labels(inst_all[ilist]).nunique(dropna=dropna_flag) < 2:
+            continue
+        if require_multi_energy and _norm_energy(pd.Series(ce_all[ilist], dtype=object)).nunique(dropna=dropna_flag) < 2:
+            continue
+        if not _has_heavy_peak(ilist, delta_mz):
+            continue
+
+        chosen_pos = pos
+        break
+
+    if chosen_pos is None:
+        raise ValueError(
+            f"No cluster met criteria (size=={cluster_size}, same INCHIKEY, "
+            f"multi-instrument, multi-energy, heavy peak ≥ precursor+{delta_mz})."
+        )
+
+    if not return_details:
+        return chosen_pos
+
+    chosen_hash = target_hashes[chosen_pos]
+    idx = np.where(hashes == chosen_hash)[0]
+    details: Dict[str, Any] = {
+        "lsh": chosen_hash,
+        "idx": idx,
+        "instruments": list(_norm_labels(inst_all[idx.tolist()]).unique()),
+        "energies": list(pd.Series(ce_all[idx.tolist()], dtype=object).unique()),
+    }
+    return chosen_pos, details
