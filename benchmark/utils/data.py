@@ -59,25 +59,6 @@ def build_query_knn_graph(embs_q: np.ndarray, k: int, thld: float) -> nx.Graph:
         G.nodes[i]["id"] = f"Q_{i}"
     return G
 
-
-# def annotate_edges_modcos_qq(G: nx.Graph, msdata_q, mz_tolerance: float = 0.05) -> None:
-#     """Rename weight->DreaMS_similarity and compute modified cosine for Q-Q edges."""
-#     cos_sim_pl = su.PeakListModifiedCosine(mz_tolerance=mz_tolerance)
-#     for u, v, d in G.edges(data=True):
-#         if "weight" in d:
-#             d["DreaMS_similarity"] = float(d["weight"])
-#             del d["weight"]
-#         d["edge_type"] = "Q-Q"
-#         try:
-#             mc = cos_sim_pl(
-#                 spec1=msdata_q[SPECTRUM][u], prec_mz1=msdata_q[PRECURSOR_MZ][u],
-#                 spec2=msdata_q[SPECTRUM][v], prec_mz2=msdata_q[PRECURSOR_MZ][v],
-#             )
-#             if isinstance(mc, (int, float)) and np.isfinite(float(mc)):
-#                 d["modified_cosine_similarity"] = float(mc)
-#         except Exception:
-#             pass
-
 def annotate_edges_modcos_qq(G: nx.Graph, msdata_q, mz_tolerance: float = 0.05) -> None:
     """
     Add node/edge info for Cytoscape:
