@@ -1,4 +1,5 @@
 import pathlib
+from pathlib import Path
 from matchms.importing import load_from_mgf
 from matchms.exporting import save_as_mgf
 import pandas as pd
@@ -179,22 +180,23 @@ def tag_top1_assignment(
     G,
     embs_q,
     embs_lib,
+    msdata_q,                 # <-- NEW
     msdata_lib,
     sim_thld: float,
     overwrite_smiles: bool = False,
+    mz_tolerance: float = 0.05,  # <-- NEW (default)
 ) -> None:
-    from sklearn.metrics.pairwise import cosine_similarity
-    import numpy as np
-
+    """Tag each query node with top-1 library hit info (keeps assignment by DreaMS sim)."""
     sims = cosine_similarity(embs_q, embs_lib)
     top1_idx = sims.argmax(axis=1)
     top1_sim = sims[np.arange(sims.shape[0]), top1_idx]
 
-    # columns() works with MSData; if it's a property in your version, change to msdata_lib.columns
     lib_cols = set(msdata_lib.columns())
     lib_has_ident = "IDENTIFIER" in lib_cols
     lib_has_ikey  = "INCHIKEY"   in lib_cols
     lib_has_smi   = "smiles"     in lib_cols
+
+    cos_sim_pl = su.PeakListModifiedCosine(mz_tolerance=mz_tolerance)
 
     for qi in range(sims.shape[0]):
         sim = float(top1_sim[qi])
@@ -217,15 +219,24 @@ def tag_top1_assignment(
                 ident = f"L_{lj}"
 
             G.nodes[qi]["has_lib_hit"] = "hit"
-            G.nodes[qi]["best_lib_similarity"] = sim
+            G.nodes[qi]["DreaMS_best_lib_similarity"] = sim
             G.nodes[qi]["best_lib_identifier"] = ident
+
+            try:
+                mc = cos_sim_pl(
+                    spec1=msdata_q[SPECTRUM][qi],   prec_mz1=msdata_q[PRECURSOR_MZ][qi],
+                    spec2=msdata_lib[SPECTRUM][lj], prec_mz2=msdata_lib[PRECURSOR_MZ][lj],
+                )
+                if isinstance(mc, (int, float)) and np.isfinite(float(mc)):
+                    G.nodes[qi]["modified_cosine_best_lib"] = float(mc)
+            except Exception:
+                pass
 
             if lib_has_smi:
                 try:
                     lib_smiles = msdata_lib.get_values("smiles", lj)
                 except Exception:
                     lib_smiles = None
-
                 if isinstance(lib_smiles, str) and lib_smiles.strip().lower() not in ("", "nan", "none"):
                     existing = G.nodes[qi].get("smiles", None)
                     exists = isinstance(existing, str) and existing.strip().lower() not in ("", "nan", "none")
@@ -236,7 +247,6 @@ def tag_top1_assignment(
 
 def export_graphs(G: nx.Graph, out_base):
     """Write GraphML directly. Attributes must already be scalar-safe."""
-    from pathlib import Path
     out_base = Path(out_base)
     out_base.parent.mkdir(parents=True, exist_ok=True)
 
