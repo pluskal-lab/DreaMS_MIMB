@@ -212,3 +212,5 @@ output/
 wandb/
 scripts/wandb/
 scripts/outputs/
+misc/
+notebooks/misc
