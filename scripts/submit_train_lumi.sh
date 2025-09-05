@@ -14,9 +14,9 @@ cd /scratch/project_465002061/DreaMS_MIMB/
 
 module --force purge
 module use /appl/local/csc/modulefiles/
-module load pytorch
-#export PYTHONNOUSERSITE=1
+module load pytorch/2.7
 source /scratch/project_465002061/DreaMS_MIMB/dreams_mimb/bin/activate
 
-srun python scripts/train.py
+srun python scripts/train.py \
+   --config-name fluorine_config.yaml
 #srun python3 -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 scripts/train.py
