@@ -180,7 +180,7 @@ def tag_top1_assignment(
     G,
     embs_q,
     embs_lib,
-    msdata_q,                 # <-- NEW
+    msdata_q,
     msdata_lib,
     sim_thld: float,
     overwrite_smiles: bool = False,
