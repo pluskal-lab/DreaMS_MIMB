@@ -14,11 +14,16 @@ cd /scratch/project_465002061/DreaMS_MIMB/
 
 module --force purge
 module use /appl/local/csc/modulefiles/
-module load pytorch
-#export PYTHONNOUSERSITE=1
+module load pytorch/2.7
+module load pytorch/2.6
+module load pytorch/2.7
 source /scratch/project_465002061/DreaMS_MIMB/dreams_mimb/bin/activate
+module load pytorch/2.7
+module load pytorch/2.6
+module load pytorch/2.7
 
-srun python scripts/train.py -m \
-  'model.hparams.train_encoder=false,true' \
-  'model.hparams.gamma=0.0,0.5,1.0' \
-  'model.hparams.alpha=0.25,0.5,0.90'
+srun python3 scripts/train.py  \
+  --config-name fluorine_config.yaml  \
+  -m 'model.hparams.lr=1e-5, 1e-6' \
+    'model.hparams.gamma=0.5,0.75,1.0' \
+    'model.hparams.alpha=0.25,0.8,0.9,0.95'
