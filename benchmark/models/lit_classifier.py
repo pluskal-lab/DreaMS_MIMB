@@ -42,11 +42,6 @@ class LitClassifier(pl.LightningModule):
             train_encoder=self.hparams.train_encoder,
         )
 
-        print(self.hparams.ckpt_path)
-        print(self.hparams.n_highest_peaks)
-        print(self.hparams.dropout)
-        print(self.hparams.train_encoder)
-        print(self.hparams.use_focal)
         # loss
         if self.hparams.use_focal:
             self.criterion = FocalLoss(
@@ -133,6 +128,9 @@ class LitClassifier(pl.LightningModule):
             for name, metric in m.items():
                 self.log(f"{stage}_{name}", metric(probs, y.long()),
                          prog_bar=(name in ('acc', 'auc')), on_step=False, on_epoch=True)
+        else:
+            pass
+
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -145,7 +143,6 @@ class LitClassifier(pl.LightningModule):
         return self.step(batch, 'test')
 
     def configure_optimizers(self):
-        print(self.hparams.lr)
         optimizer = AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=1e-5)
         # scheduler = OneCycleLR(
         #     optimizer,
