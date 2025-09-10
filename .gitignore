@@ -215,3 +215,20 @@ scripts/wandb/
 scripts/outputs/
 misc/
 notebooks/misc
+
+
+# Ignore all notebooks in the folder...
+notebooks/*.ipynb
+# ...then un-ignore the five we want to publish
+!notebooks/0_notebook_tutorial.ipynb
+!notebooks/1_data_preparation.ipynb
+!notebooks/2_deduplication.ipynb
+!notebooks/3_library_matching.ipynb
+!notebooks/4_molecular_networking.ipynb
+
+# Logs, checkpoints, and other local artifacts
+notebooks/lightning_logs/
+notebooks/*.ckpt
+*.ckpt
+*.log
+.DS_Store
