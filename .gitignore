@@ -246,3 +246,22 @@ scripts/*
 scripts/outputs/
 scripts/wandb/
 scripts/**/*.log
+
+# benchmark
+benchmark/*
+
+# Keep the package root files
+!benchmark/__init__.py
+!benchmark/definitions.py
+
+# Keep only these in utils/
+!benchmark/utils/
+benchmark/utils/*
+!benchmark/utils/__init__.py
+!benchmark/utils/chem.py
+!benchmark/utils/data.py
+!benchmark/utils/plots.py
+
+# Ignore caches/artefacts
+**/__pycache__/
+*.pyc
