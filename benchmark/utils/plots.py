@@ -26,6 +26,7 @@ def plot_molecule_pair(
     cosine_sim: float | None = None,
     tanimoto: float | None = None,
     header_loc: str = "top-left",  # "top-left" | "top-right"
+    save_pth: str | None = None
 ):
     """
     Render two SMILES side-by-side and overlay DreaMS / Cosine / Tanimoto text on the SVG.
@@ -94,6 +95,11 @@ def plot_molecule_pair(
         if insert_at == -1:
             insert_at = len(svg)
         svg = svg[:insert_at] + overlay + svg[insert_at:]
+
+    if save_pth:
+        p = Path(save_pth)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(svg, encoding="utf-8")
 
     display(SVG(svg))
 
