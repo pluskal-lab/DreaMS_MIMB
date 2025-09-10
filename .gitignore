@@ -209,6 +209,7 @@ lightning_logs/
 *.ckpt
 results/
 output/
+outputs/
 wandb/
 scripts/wandb/
 scripts/outputs/
