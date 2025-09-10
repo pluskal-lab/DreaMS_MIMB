@@ -26,10 +26,7 @@ DreaMS_MIMB/
 │    ├── 1_data_preparation.ipynb         # Loading and understanding MSData objects
 │    ├── 2_deduplication.ipynb            # How to deduplicate spectra
 │    ├── 3_library_matching.ipynb         # Match data to spectral libraries
-TODO LOWER NOT PREPARED YET
-│    ├── 4_1_DreaMS_focal_loss.ipynb      # Learn about focal loss in DreaMS
-│    ├── 4_DreaMS_finetuning.ipynb        # Fine-tune the DreaMS model
-│    ├── 5_prediction_investigation.ipynb # Dive into predictions and their meaning
+│    ├── 4_molecular_networking.ipynb     # Molecular networking with DreaMS
 │
 ├── environment.yml    # Reproducible setup for Conda
 ├── benchmark          # All main code and packages used in the tutorials
