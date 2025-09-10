@@ -232,3 +232,17 @@ notebooks/*.ckpt
 *.ckpt
 *.log
 .DS_Store
+
+
+# Ignore everything in scripts/
+scripts/*
+
+# Allow three files
+!scripts/download_assets.py
+!scripts/download_gems.py
+!scripts/install_env.sh
+
+# Ignore run artifacts
+scripts/outputs/
+scripts/wandb/
+scripts/**/*.log
