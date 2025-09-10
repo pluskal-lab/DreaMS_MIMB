@@ -1,67 +1,46 @@
-# configs/config.yaml
-
-hydra:
-  job:
-    chdir: false
-
-# === Data Section ===
 data:
   mgf_path: data/massspecgym/MassSpecGym.mgf
-  labeled_mgf: data/massspecgym/MassSpecGym_chlorine.mgf
-  label_element: Cl
-
+  labeled_mgf: data/massspecgym/MassSpecGym_fluorine.mgf
+  label_element: F
   transform:
     _target_: massspecgym.data.transforms.SpecTokenizer
     n_peaks: 100
-
   dataset:
     _target_: benchmark.data.datasets.BinaryDetectionDataset
-    # will be overridden by train.py to point at labeled_mgf
     pth: ${data.labeled_mgf}
     spec_transform: ${data.transform}
-
   datamodule:
     _target_: benchmark.data.data_module.BenchmarkDataModule
     dataset: ${data.dataset}
     batch_size: 256
     num_workers: 0
     persistent_workers: true
-
-
-# === Model Section ===
 model:
   name: lit_classifier
   hparams:
     ckpt_path: data/model_checkpoints/ssl_model.ckpt
     num_classes: 2
     n_highest_peaks: 100
-    lr: 5e-5
-    dropout: 0.2
+    lr: 5.0e-05
+    dropout: 0.1
     train_encoder: true
     use_focal: true
     gamma: 0.5
     alpha: 0.8
-
-# === Trainer Section ===
 trainer:
   _target_: pytorch_lightning.Trainer
-  max_epochs: 3
+  max_epochs: 10
   gradient_clip_val: 0.5
   accelerator: gpu
   devices: 1
   num_nodes: 1
   strategy: auto
-
-# === Logger ===
 logger:
-  # Hydra will call: WandbLogger(**this dict)
   _target_: pytorch_lightning.loggers.WandbLogger
-  project: DreaMS_MIMB_small
-  entity:  jozefov-iocb-prague
-  name:    chlorine_experiment_01
-  # pass the full config so you can see hyperparams in WandB
-  config:  configs/test_config.yaml
-
+  project: DreaMS_MIMB_fluorine
+  entity: jozefov-iocb-prague
+  name: fluorine_experiment_01
+  config: configs/fluorine_config.yaml
 callbacks:
   checkpoint:
     monitor: val_loss

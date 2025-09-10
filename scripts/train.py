@@ -28,10 +28,12 @@ import wandb
 from benchmark.data.datasets import BinaryDetectionDataset
 from benchmark.models import MODEL_REGISTRY
 
-@hydra.main(config_path="../configs", config_name="test_config")
+@hydra.main(version_base=None, config_path="../configs", config_name=None)
 def main(cfg):
     # Convert full Hydra config to dict for WandB
     config_dict = OmegaConf.to_container(cfg, resolve=True)
+    print("→ Loaded config:")
+    print(OmegaConf.to_yaml(cfg))
 
     # 1) WandB logger
     # prepend a timestamp so each run is unique
@@ -43,6 +45,10 @@ def main(cfg):
         entity=cfg.logger.entity,
         name=run_name,
         config=config_dict
+    )
+    wandb_logger.experiment.config.update(
+        OmegaConf.to_container(cfg.model.hparams, resolve=True),
+        allow_val_change=True
     )
 
     # 2) Callbacks
