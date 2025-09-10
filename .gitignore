@@ -213,6 +213,7 @@ outputs/
 wandb/
 scripts/wandb/
 scripts/outputs/
+configs/
 misc/
 notebooks/misc
 
