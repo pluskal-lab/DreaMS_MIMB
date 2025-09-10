@@ -266,3 +266,155 @@ benchmark/utils/*
 # Ignore caches/artefacts
 **/__pycache__/
 *.pyc
+
+
+##############################
+# NEW ML IGNORES
+##############################
+
+# General-purpose ML / Python .gitignore
+#  Safe defaults for experiments, logs, checkpoints, environments, IDE settings, and OS files.
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Build and packaging artifacts created by setuptools/pip/build tools
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+wheelhouse/
+.venv-build/
+
+# Test tooling caches and coverage outputs
+.pytest_cache/
+.coverage
+.coverage.*
+.cache/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.dmypy.json
+.pytype/
+
+# Local virtual environments and environment files (keep these out of VCS)
+.env
+.env.*
+*.env
+venv/
+.venv/
+env/
+.envs/
+.conda/
+conda-env/
+.mamba/
+.mambaforge/
+.poetry/
+.poetry-cache/
+
+# Jupyter Notebook transient files and checkpoints
+.ipynb_checkpoints/
+**/*-checkpoint.ipynb
+.jupyter/
+
+# Logs commonly produced by apps, training runs, and scripts
+logs/
+**/*.log
+*.log
+*.out
+*.err
+
+# Outputs, results, and temporary scratch/caches created during experiments
+output/
+outputs/
+results/
+artifacts/
+artifacts_tmp/
+scratch/
+tmp/
+temp/
+tmp_*/
+**/.tmp/
+**/.cache/
+.cache/
+
+# Checkpoints and model weights from training
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.h5
+*.joblib
+*.pkl
+*.safetensors
+checkpoints/
+models/
+lightning_logs/
+
+# Popular experiment tracking/visualization tool directories
+wandb/
+runs/                 # TensorBoard default
+events.out.tfevents.* # TensorBoard event files
+.tensorboard-info/
+mlruns/               # MLflow
+mlartifacts/
+ray_results/          # Ray Tune
+tune_results/
+dask-worker-space/
+
+
+# Scheduler/cluster job output files (e.g., SLURM)
+slurm-*.out
+slurm-*.err
+*.o[0-9]*
+*.e[0-9]*
+*.po[0-9]*
+*.pe[0-9]*
+
+# Keys and certificates (avoid committing secrets)
+*.key
+*.pem
+*.cert
+*.crt
+
+# Visual Studio Code
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
+#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#  and can be added to the global gitignore or merged into this file. If you prefer, you can ignore the entire folder:
+# .vscode/
+.vscode/
+*.code-workspace
+
+# JetBrains / PyCharm IDE metadata
+.idea/
+*.iml
+
+# Other editor/project metadata (Spyder, Rope, Sublime)
+.spyproject/
+.ropeproject/
+.sublime-project
+.sublime-workspace
+
+# Operating system metadata (macOS/Windows)
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Containers / CI auxiliary state (keep your Dockerfile and workflows tracked)
+.docker/
+docker-compose.override.yml
+*.pod
+*.pid
+
