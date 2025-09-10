@@ -1,9 +1,19 @@
-# DreaMS_MIMB
+# DreaMS MIMB (Methods in Molecular Biology)
+
+---
+
+
+<p align="center">
+  <a href="https://github.com/pluskal-lab/DreaMS">
+    <img src="assets/dreams_background.png" alt="DreaMS" width="800">
+  </a>
+</p>
+
+
 
 This repository is the hands-on companion to the book chapter *Using Foundational Models for Mass Spectrometry*. It includes ready-to-run Jupyter notebooks, datasets, and pretrained models for [DreaMS](https://www.nature.com/articles/s41587-025-02663-3) and [MassSpecGym](https://arxiv.org/abs/2410.23326). You can follow the complete workflow, from preparing and deduplicating spectra to matching them in spectral libraries and fine-tuning models. The tutorials match the chapter’s examples and are easy to follow for both beginners and experienced researchers. Everything comes with installation scripts so you can set up the environment quickly and adapt the methods to your own data.
 
 ---
-
 ## 🚀 What is DreaMS_MIMB?
 
 - **DreaMS_MIMB** is a collection of logical, stepwise tutorials (Jupyter Notebooks) to teach you:
@@ -21,18 +31,29 @@ This repository is the hands-on companion to the book chapter *Using Foundationa
 ```
 DreaMS_MIMB/
 │
+├── benchmark                                # All main code and packages used in the tutorials
+├── data/                                    # Where your data files go (see notebooks for instructions)
+│   ├── Piper_data_smiles.csv                # SMILES and metadata table for Piper fimbriulatum compounds
+│   ├── Piper_sirius_all_annotated.mgf       # All spectra from Piper fimbriulatum
+│   ├── Piper_sirius_matched_annotated.mgf   # Subset of only annotated spectra
+│   ├── massspecgym/                    
+│   │   └── MassSpecGym.mgf                  # MassSpecGym spectral library used for retrieval/matching
+│   └── model_checkpoints/                   # Pretrained model weights used by DreaMS
+│       ├── embedding_model.ckpt             # Finetuned DreaMS for similarity 
+│       └── ssl_model.ckpt                   # Self-supervised backbone for fine-tuning/customization
 ├── notebooks/
-│    ├── 0_notebook_tutorial.ipynb        # Start here: understanding work with notebooks and data
-│    ├── 1_data_preparation.ipynb         # Loading and understanding MSData objects
-│    ├── 2_deduplication.ipynb            # How to deduplicate spectra
-│    ├── 3_library_matching.ipynb         # Match data to spectral libraries
-│    ├── 4_molecular_networking.ipynb     # Molecular networking with DreaMS
-│
-├── environment.yml    # Reproducible setup for Conda
-├── benchmark          # All main code and packages used in the tutorials
-├── paths.py           # Unified project paths for all code
-├── data/              # Where your data files go (see notebooks for instructions)
-├── README.md          # You are here!
+│   ├── 0_notebook_tutorial.ipynb            # Start here: understanding work with notebooks and data
+│   ├── 1_data_preparation.ipynb             # Loading and understanding MSData objects
+│   ├── 2_deduplication.ipynb                # How to deduplicate spectra
+│   ├── 3_library_matching.ipynb             # Match data to spectral libraries
+│   ├── 4_molecular_networking.ipynb         # Molecular networking with DreaMS
+├── LICENSE                                  # Repository license (terms for use/modification/distribution)
+├── configs                               
+├── README.md                                # You are here! Project overview and getting started
+├── environment.yml                          # Reproducible setup for Conda
+├── paths.py                                 # Unified project paths for all code 
+├── scripts/                                 # Helper scripts (env install, data download, utilities)
+└── setup.py                                
 ```
 
 ---
