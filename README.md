@@ -11,7 +11,7 @@
 
 
 
-This repository is the hands-on companion to the book chapter *Using Foundational Models for Mass Spectrometry*. It includes ready-to-run Jupyter notebooks, datasets, and pretrained models for [DreaMS](https://www.nature.com/articles/s41587-025-02663-3) and [MassSpecGym](https://arxiv.org/abs/2410.23326). You can follow the complete workflow, from preparing and deduplicating spectra to matching them in spectral libraries and fine-tuning models. The tutorials match the chapter’s examples and are easy to follow for both beginners and experienced researchers. Everything comes with installation scripts so you can set up the environment quickly and adapt the methods to your own data.
+This repository is the hands-on companion to the book chapter *Annotating metabolomics data using DreaMS and MassSpecGym*. It includes ready-to-run Jupyter notebooks, datasets, and pretrained models for [DreaMS](https://www.nature.com/articles/s41587-025-02663-3) and [MassSpecGym](https://arxiv.org/abs/2410.23326). You can follow the complete workflow, from preparing and deduplicating spectra to matching them in spectral libraries and fine-tuning models. The tutorials match the chapter’s examples and are easy to follow for both beginners and experienced researchers. Everything comes with installation scripts so you can set up the environment quickly and adapt the methods to your own data.
 
 ---
 ## 🚀 What is DreaMS_MIMB?
@@ -23,6 +23,19 @@ This repository is the hands-on companion to the book chapter *Using Foundationa
   - Investigate and interpret predictions
 
 **No prior experience with machine learning or mass spectrometry required!**
+
+
+---
+## 🧠 What is DreaMS?
+
+
+<p align="center">
+  <a href="https://github.com/pluskal-lab/DreaMS">
+    <img src="assets/DreaMS_MIMB_11.png" alt="DreaMS - Deep Representations Empowering the Annotation of Mass Spectra" width="800">
+  </a>
+</p>
+
+[DreaMS](https://www.nature.com/articles/s41587-025-02663-3) (Deep Representations Empowering the Annotation of Mass Spectra) is a transformer-based foundation model for tandem mass spectrometry. Trained in a self-supervised manner on millions of unannotated spectra from the [GNPS](https://www.nature.com/articles/nbt.3597) open data repository, DreaMS learns general-purpose embeddings, high-dimensional numerical representations of spectra that capture chemical and structural relationships of the underlying molecules. The pre-training task, analogous to masked language modeling in natural language processing, involves reconstructing masked peaks and relative retention order of compounds in chromatography. This self-supervised stage enables DreaMS to learn from the immense pool of unlabelled data, after which the model can be fine-tuned for specific downstream tasks such as elemental composition prediction, spectral similarity search, or molecular fingerprint prediction.
 
 ---
 
