@@ -46,3 +46,6 @@ dependencies:
     - tokenizers==0.19.1
     - huggingface-hub==0.24.5
     - requests
+    - pandarallel==1.6.5
+    - fire==0.6.0
+    - msml @ git+https://github.com/roman-bushuiev/msml_legacy_architectures.git@main
