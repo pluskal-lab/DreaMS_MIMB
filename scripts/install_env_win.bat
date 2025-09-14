@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM =============================================
 REM DreaMS_MIMB Windows one-click installer (CPU)
-REM Run this from Anaconda Prompt in repo root.
+REM Run this from Anaconda Prompt in the repo root.
 REM =============================================
 
 REM --- Guard: in repo root?
@@ -12,92 +12,70 @@ if not exist "environment.yml" (
   exit /b 1
 )
 
-REM --- Guard: conda available?
+REM --- Conda present?
 where conda
 if errorlevel 1 (
   echo [ERROR] Conda not found. Use "Anaconda Prompt (miniconda3)".
   exit /b 1
 )
 
-REM --- Ensure channels (idempotent)
-conda config --add channels conda-forge
-conda config --add channels bioconda
-conda config --add channels defaults
+REM --- Channels (idempotent)
+echo === STEP 1: add channels ===
+conda config --add channels conda-forge || goto :error
+conda config --add channels bioconda     || goto :error
+conda config --add channels defaults     || goto :error
 
-REM --- Create env from YAML (name inside YAML is "dreams_mimb")
-echo === Creating environment "dreams_mimb" from environment.yml ===
-conda env create -f environment.yml
-if errorlevel 1 (
-  echo [ERROR] Could not create environment from environment.yml
-  exit /b 1
-)
+REM --- Create env
+echo === STEP 2: create env from environment.yml ===
+conda env create -f environment.yml || goto :error
 
-REM --- Activate env
-call conda activate dreams_mimb
-if errorlevel 1 (
-  echo [ERROR] Could not activate environment "dreams_mimb"
-  exit /b 1
-)
-
-REM --- Verify activation
+REM --- Activate
+echo === STEP 3: activate env ===
+call conda activate dreams_mimb || goto :error
 echo CONDA_PREFIX=%CONDA_PREFIX%
-if "%CONDA_PREFIX%"=="" (
-  echo [ERROR] Environment not activated. Stop.
-  exit /b 1
-)
+if "%CONDA_PREFIX%"=="" goto :error
 
-REM --- Ensure MSVC runtime (fixes fbgemm.dll on fresh Windows)
-conda install -y -c conda-forge vs2015_runtime vc14_runtime
+REM --- MSVC runtime (fixes fbgemm.dll)
+echo === STEP 4: install MSVC runtime ===
+conda install -y -c conda-forge vs2015_runtime vc14_runtime || goto :error
 
-REM --- If conda’s PyTorch is present, remove ONLY that (leave others alone)
-conda list | findstr /R "^pytorch\s"
-if %errorlevel%==0 (
-  echo === Removing conda pytorch to avoid Windows DLL issues ===
-  conda remove -y pytorch
-)
+REM --- Replace conda torch with official CPU wheel
+echo === STEP 5: replace torch with CPU wheel ===
+conda remove -y pytorch
+python -m pip uninstall -y torch
+python -m pip install --upgrade --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.3.0 || goto :error
 
-REM --- Remove any pip torch if present (ok if missing)
-python -c "import importlib,sys;sys.exit(0 if importlib.util.find_spec('torch') else 1)"
-if %errorlevel%==0 (
-  python -m pip uninstall -y torch
-)
+REM --- Lightning stack
+echo === STEP 6: lightning stack ===
+python -m pip install --upgrade pytorch-lightning==2.2.5 torchmetrics==1.4.0 || goto :error
+python -m pip install --upgrade lightning-utilities || goto :error
 
-REM --- Install PyTorch (CPU) from the official wheel index
-echo === Installing PyTorch 2.3.0 (CPU) via pip ===
-python -m pip install --upgrade --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.3.0
-if errorlevel 1 (
-  echo [ERROR] Failed installing PyTorch CPU wheel.
-  exit /b 1
-)
+REM --- Project extras
+echo === STEP 7: project extras ===
+python -m pip install --no-deps git+https://github.com/pluskal-lab/DreaMS.git || goto :error
+python -m pip install --no-deps massspecgym || goto :error
+python -m pip install pandarallel==1.6.5 fire==0.6.0 || goto :error
+python -m pip install --no-deps git+https://github.com/roman-bushuiev/msml_legacy_architectures.git@main || goto :error
 
-REM --- Lightning stack (pip; matches your pins)
-python -m pip install --upgrade pytorch-lightning==2.2.5 torchmetrics==1.4.0
-python -m pip install --upgrade lightning-utilities
-
-REM --- Project extras (no-deps to avoid pulling conflicting torch)
-python -m pip install --no-deps git+https://github.com/pluskal-lab/DreaMS.git
-python -m pip install --no-deps massspecgym
-
-REM --- Missing libs you needed on Windows
-python -m pip install pandarallel==1.6.5 fire==0.6.0
-python -m pip install --no-deps git+https://github.com/roman-bushuiev/msml_legacy_architectures.git@main
-
-REM --- Register Jupyter kernel for this env
-python -m pip install --upgrade ipykernel
-python -m ipykernel install --user --name dreams_mimb --display-name "Python (dreams_mimb)"
+REM --- Register kernel
+echo === STEP 8: register Jupyter kernel ===
+python -m pip install --upgrade ipykernel || goto :error
+python -m ipykernel install --user --name dreams_mimb --display-name "Python (dreams_mimb)" || goto :error
 
 REM --- Sanity
-python -c "import sys, torch; print('Python:', sys.executable); print('Torch:', torch.__version__, 'CUDA?', torch.cuda.is_available())" || (
-  echo [ERROR] Torch sanity failed.
-  exit /b 1
-)
+echo === STEP 9: sanity ===
+python -c "import sys, torch; print('Python:', sys.executable); print('Torch:', torch.__version__, 'CUDA?', torch.cuda.is_available())" || goto :error
 
 echo.
 echo ✔ All set.
-echo Next steps:
-echo     conda activate dreams_mimb
-echo     python scripts\download_assets.py
-echo     jupyter lab
-echo     (Kernel -> Python (dreams_mimb))
+echo Next:
+echo   conda activate dreams_mimb
+echo   python scripts\download_assets.py
+echo   jupyter lab   (Kernel -> Python (dreams_mimb))
 echo.
-endlocal
+goto :eof
+
+:error
+echo.
+echo *** INSTALL FAILED at the step above. ERRORLEVEL=%ERRORLEVEL% ***
+exit /b %ERRORLEVEL%
