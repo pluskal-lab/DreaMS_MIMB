@@ -37,7 +37,7 @@ call conda activate dreams_mimb || (
 REM 5) Ensure MSVC runtime (fixes fbgemm.dll on fresh Windows)
 conda install -y -c conda-forge vs2015_runtime vc14_runtime
 
-REM 6) If conda's PyTorch is present, remove
+REM 6) If conda's PyTorch is present, remove ONLY that
 conda list pytorch | findstr /R "^pytorch\s" >nul
 if %errorlevel%==0 (
   echo === Removing conda pytorch to avoid DLL issues on Windows ===
@@ -74,11 +74,7 @@ python -m ipykernel install --user --name dreams_mimb --display-name "Python (dr
 
 echo.
 echo === Sanity ===
-python - << "PY"
-import sys, torch
-print("Python:", sys.executable)
-print("Torch:", torch.__version__, "CUDA?", torch.cuda.is_available())
-PY
+python -c "import sys, torch; print('Python:', sys.executable); print('Torch:', torch.__version__, 'CUDA?', torch.cuda.is_available())"
 
 echo.
 echo ✔ All set.
