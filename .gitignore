@@ -242,6 +242,7 @@ scripts/*
 !scripts/download_assets.py
 !scripts/download_gems.py
 !scripts/install_env.sh
+!scripts/install_env_win.bat
 
 # Ignore run artifacts
 scripts/outputs/
