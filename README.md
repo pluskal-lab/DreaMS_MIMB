@@ -325,10 +325,11 @@ jupyter lab
 	
 2.	Navigate to the folder where you want the project. For example:    
 
-        ```bash
-       cd C:\Users\CODE
-        ```
-      (If the folder doesn’t exist, create it first with mkdir C:\Users\CODE.)This will be the location where the code and data for this project are saved.
+	```bash 
+	 cd C:\Users\CODE 
+	```  
+
+(If the folder doesn’t exist, create it first with mkdir C:\Users\CODE.)This will be the location where the code and data for this project are saved.
 
 3. Clone the repository:
 
@@ -375,6 +376,7 @@ Always activate the environment when starting a new terminal session.
 
 This will fill the `data/` folder with everything needed for the tutorials.  
 Make sure you are inside your project folder:
+
     ```
     C:\Users\CODE\DreaMS_MIMB
     ```
