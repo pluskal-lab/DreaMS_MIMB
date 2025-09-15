@@ -375,11 +375,7 @@ Always activate the environment when starting a new terminal session.
     ```
 
 This will fill the `data/` folder with everything needed for the tutorials.  
-Make sure you are inside your project folder:
-
-    ```
-    C:\Users\CODE\DreaMS_MIMB
-    ```
+Make sure you are inside your project folder: `C:\Users\CODE\DreaMS_MIMB`
 
 ---
 
@@ -396,7 +392,7 @@ jupyter lab
 
 > **Tip:**  
 > In JupyterLab, go to the top menu:  
-> \`Kernel → Change Kernel → Python (dreams_mimb)\`  
+> `Kernel → Change Kernel → Python (dreams_mimb)`  
 > This ensures you’re running notebooks inside the correct environment.
 
 When JupyterLab opens, you’re ready to continue with the tutorials:  
