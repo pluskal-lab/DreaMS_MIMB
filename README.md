@@ -267,8 +267,149 @@ Jupyter notebooks are interactive documents that combine code, text, and visuali
 
 > **Tip:** If you're new to Jupyter, check the top menu for a ▶️ **Run** button, it's a quick way to execute the selected cell.
 
+---
+<h2 id="quick-setup"> Minimal setup commands (Mac, Linux)</h2>
+
+```bash
+git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
+cd DreaMS_MIMB
+bash install_env.sh
+conda activate dreams_mimb
+python scripts/download_assets.py
+jupyter lab
+```
 
 ---
+
+## 💻 Windows Installation
+
+### 🛠️ Prerequisites
+
+1. **Check if Conda/Miniconda is installed**  
+   On Windows, we will use the **Anaconda Prompt** for installation.  
+
+   - Press the **Windows key**, start typing **Anaconda Prompt (miniconda3)**, then press **Enter**.  
+   - You should see a black terminal window starting with something like:
+     ```
+     (base) C:\Users\YourName>
+     ```
+   - This confirms Conda is installed. To double-check, type:
+     ```bash
+     conda --version
+     ```
+     Example output:
+     ```
+     conda 23.3.1
+     ```
+
+   - If you don’t have Conda, install Miniconda from:  
+     [https://www.anaconda.com/docs/getting-started/miniconda/main](https://www.anaconda.com/docs/getting-started/miniconda/main)  
+     Download the **Windows 64-bit installer (Python 3.x)**.
+
+2. **Check if Git is installed**  
+   In the Anaconda Prompt, type:
+   ```bash
+   git --version
+    ```
+   You should now see a version like git version 2.x.x. 
+
+### 📦 Step 2: Get the code
+	
+1.	Stay in the Anaconda Prompt.
+	
+2.	Navigate to the folder where you want the project. For example:    
+
+        ```bash
+       cd C:\Users\CODE
+        ```
+      (If the folder doesn’t exist, create it first with mkdir C:\Users\CODE.)This will be the location where the code and data for this project are saved.
+
+3. Clone the repository:
+
+    ```bash
+    git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
+    cd DreaMS_MIMB
+    ```
+4. Verify your location with:
+
+    ```bat
+    cd
+    ```
+    You should see something like: `(base) C:\Users\CODE\DreaMS_MIMB>`
+   The `(base)` prefix indicates Anaconda’s default environment is active.
+
+### ⚙️ Install the Environment
+
+From inside the repository folder (C:\Users\CODE\DreaMS_MIMB), run:
+```bat
+scripts\install_env_win.bat
+```
+- This sets up the `dreams_mimb` Conda environment automatically.  
+- At the end, you’ll see a sanity check printing your Python path and PyTorch version.
+
+### 🔑 Activate the Environment & Download Data
+
+1. Activate the environment:
+    ```bat
+    conda activate dreams_mimb
+    ```
+
+- Your prompt will now look like:
+    ```
+    (dreams_mimb) C:\Users\CODE\DreaMS_MIMB>
+    ```
+Always activate the environment when starting a new terminal session.
+
+2. Download the datasets:
+    ```bat
+    python scripts\download_assets.py
+    ```
+
+This will fill the `data/` folder with everything needed for the tutorials.  
+Make sure you are inside your project folder:
+    ```
+    C:\Users\CODE\DreaMS_MIMB
+    ```
+
+
+### 📓 Start JupyterLab and Run Notebooks
+
+With the environment activated and inside the project folder, type:
+\`\`\`bat
+jupyter lab
+\`\`\`
+
+- Your browser will open JupyterLab.  
+- If it doesn’t, copy the URL shown in the terminal (e.g. \`http://localhost:8888/lab?...\`) and paste it into your browser.
+
+> **Tip:**  
+> In JupyterLab, go to the top menu:  
+> \`Kernel → Change Kernel → Python (dreams_mimb)\`  
+> This ensures you’re running notebooks inside the correct environment.
+
+When JupyterLab opens, you’re ready to continue with the tutorials:  
+👉 [Go to Step 5: Follow the Tutorials](#-step-5-follow-the-tutorials)
+
+### ⚡ Quick Setup (Windows, copy-paste)
+
+If you’re comfortable with the terminal, here’s the complete sequence:
+Open Anaconda Prompt (miniconda3) first
+
+```bat
+conda --version
+git --version
+
+cd C:\Users\PluskalLAB\CODE
+git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
+cd DreaMS_MIMB
+
+scripts\install_env_win.bat
+
+conda activate dreams_mimb
+python scripts\download_assets.py
+jupyter lab
+```
+
 
 ## 🧩 Troubleshooting
 
@@ -325,134 +466,7 @@ Special thanks to everyone who helped shape these tutorials.
 This project was developed as a companion to the DreaMS book chapter, designed for researchers and students curious about **modern machine learning in mass spectrometry**, with a **hands-on, code-first approach**.
 
 
-<h2 id="quick-setup"> Minimal setup commands (for quick copy-paste)</h2>
 
-```bash
-git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
-cd DreaMS_MIMB
-bash install_env.sh
-conda activate dreams_mimb
-python scripts/download_assets.py
-jupyter lab
-```
-
-# Windows REWRITE
-
-
-
-💻 Windows Installation Guide
-
-If you are on Windows, follow these steps to get started.
-
-1. Install Miniconda
-	1.	Download Miniconda from the official page:
-https://www.anaconda.com/docs/getting-started/miniconda/main
-	2.	Run the installer and accept the defaults.
-(This will install conda and add an Anaconda Prompt (miniconda3) to your Start Menu.)
-	3.	Open Anaconda Prompt (miniconda3) from the Start Menu and check that Conda is available:
-
-conda --version
-
-You should see something like:
-
-conda 25.7.0
-
-
-
-⸻
-
-2. Install Git
-
-Check if Git is already installed:
-
-git --version
-
-If you see a version number, skip this step.
-If not, download Git from https://git-scm.com/download/win and use these recommended options:
-	•	Adjusting your PATH → Git from the command line and also from 3rd-party software
-	•	Default editor → Notepad (or VS Code if you prefer)
-	•	Line endings → Checkout Windows-style, commit Unix-style (recommended)
-	•	SSH executable → Use bundled OpenSSH
-	•	Default branch name → main
-	•	Credential helper → Git Credential Manager
-	•	Leave the rest as defaults → Install → Finish
-
-Close your prompt, open it again, and check:
-
-git --version
-
-You should now see something like:
-
-git version 2.51.0.windows.1
-
-
-⸻
-
-3. Get the Code
-
-Choose where you want to keep the project (for example C:\Users\PluskalLAB\CODE):
-
-cd C:\Users\PluskalLAB\CODE
-git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
-cd DreaMS_MIMB
-
-
-⸻
-
-4. Install the Environment
-
-We provide a Windows installation script that sets up everything for you.
-
-Run:
-
-scripts\install_env_win.bat
-
-This will:
-	•	Create the dreams_mimb Conda environment
-	•	Install all dependencies (including PyTorch CPU build)
-	•	Register the Jupyter kernel
-
-At the end, you should see a message confirming the install.
-
-⸻
-
-5. Activate and Fetch Data
-
-Each time you work with the project, first activate the environment:
-
-conda activate dreams_mimb
-
-Then download the data assets:
-
-python scripts\download_assets.py
-
-This will populate the data/ folder with all required files.
-
-⸻
-
-6. Start JupyterLab
-
-Finally, launch JupyterLab:
-
-jupyter lab
-
-	•	A browser tab will open automatically
-	•	Select the Kernel → Python (dreams_mimb) option
-	•	Navigate to the notebooks/ folder and start with 0_notebook_tutorial.ipynb
-
-⸻
-
-⚡ Quick setup (Windows)
-
-For experienced users, here are the minimal commands:
-
-cd C:\Users\PluskalLAB\CODE
-git clone https://github.com/pluskal-lab/DreaMS_MIMB.git
-cd DreaMS_MIMB
-scripts\install_env_win.bat
-conda activate dreams_mimb
-python scripts\download_assets.py
-jupyter lab
 
 
 
