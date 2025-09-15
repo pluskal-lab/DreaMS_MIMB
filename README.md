@@ -19,8 +19,8 @@ This repository is the hands-on companion to the book chapter *Annotating metabo
 - **DreaMS_MIMB** is a collection of logical, stepwise tutorials (Jupyter Notebooks) to teach you:
   - How to prepare mass spectrometry data
   - Deduplicate and match spectral libraries
-  - Train and fine-tune the DreaMS model for your own data
-  - Investigate and interpret predictions
+  - Embedding and retrieval from reference library
+  - Molecular networking and mass spectra annotation
 
 **No prior experience with machine learning or mass spectrometry required!**
 
@@ -74,8 +74,12 @@ DreaMS_MIMB/
 
 <h2 id="step1">🛠️ Step 1: Prerequisites</h2>
 
+> 🪟 **Windows user?**  
+> This step focuses on macOS/Linux. For Windows-specific instructions, see [💻 Windows Installation](#windows-install).
+
 > ⚠️ **Experienced user?**  
 > You can skip directly to the [Minimal setup commands](#quick-setup).
+
 
 Before you start, make sure you have:
 - **Anaconda / Miniconda installed**  
@@ -196,7 +200,7 @@ If you see the version number, proceed! If not, [go back to Step 1](#step1).
 
 ---
 
-## 📓 Step 4: Start Jupyter Notebooks
+<h2 id="step4">📓 Step 4: Start Jupyter Notebooks</h2>
 
 To work with this project, you **must** use Jupyter Notebooks.
 Jupyter lets you run small pieces of code (called “cells”), see the results instantly, and mix code with explanations, all in your web browser.
@@ -241,7 +245,7 @@ jupyter notebook
 
 ---
 
-## 📚 Step 5: Follow the Tutorials
+<h2 id="step5">📚 Step 5: Follow the Tutorials</h2>
 
 Once your environment is set up, you're ready to explore the project through interactive Jupyter notebooks.
 
@@ -281,9 +285,9 @@ jupyter lab
 
 ---
 
-## 💻 Windows Installation
+<h2 id="windows-install">💻 Windows Installation</h2>
 
-### 🛠️ Prerequisites
+## 🛠️ Prerequisites
 
 1. **Check if Conda/Miniconda is installed**  
    On Windows, we will use the **Anaconda Prompt** for installation.  
@@ -313,7 +317,9 @@ jupyter lab
     ```
    You should now see a version like git version 2.x.x. 
 
-### 📦 Step 2: Get the code
+---
+
+## 📦 Step 2: Get the code
 	
 1.	Stay in the Anaconda Prompt.
 	
@@ -338,7 +344,7 @@ jupyter lab
     You should see something like: `(base) C:\Users\CODE\DreaMS_MIMB>`
    The `(base)` prefix indicates Anaconda’s default environment is active.
 
-### ⚙️ Install the Environment
+## ⚙️ Install the Environment
 
 From inside the repository folder (C:\Users\CODE\DreaMS_MIMB), run:
 ```bat
@@ -347,7 +353,9 @@ scripts\install_env_win.bat
 - This sets up the `dreams_mimb` Conda environment automatically.  
 - At the end, you’ll see a sanity check printing your Python path and PyTorch version.
 
-### 🔑 Activate the Environment & Download Data
+---
+
+## 🔑 Activate the Environment & Download Data
 
 1. Activate the environment:
     ```bat
@@ -371,16 +379,18 @@ Make sure you are inside your project folder:
     C:\Users\CODE\DreaMS_MIMB
     ```
 
+---
 
-### 📓 Start JupyterLab and Run Notebooks
+## 📓 Start JupyterLab and Run Notebooks
 
 With the environment activated and inside the project folder, type:
-\`\`\`bat
+```bat
 jupyter lab
-\`\`\`
+```
 
 - Your browser will open JupyterLab.  
-- If it doesn’t, copy the URL shown in the terminal (e.g. \`http://localhost:8888/lab?...\`) and paste it into your browser.
+- If it doesn’t, copy the URL shown in the terminal (e.g. \`http://localhost:8888/lab?...\`) and paste it into your browser.  
+  For more help, see [Step 4: Start Jupyter Notebooks](#step4).
 
 > **Tip:**  
 > In JupyterLab, go to the top menu:  
@@ -388,9 +398,9 @@ jupyter lab
 > This ensures you’re running notebooks inside the correct environment.
 
 When JupyterLab opens, you’re ready to continue with the tutorials:  
-👉 [Go to Step 5: Follow the Tutorials](#-step-5-follow-the-tutorials)
+👉 [Go to Step 5: Follow the Tutorials](#step5)
 
-### ⚡ Quick Setup (Windows, copy-paste)
+## ⚡ Quick Setup (Windows, copy-paste)
 
 If you’re comfortable with the terminal, here’s the complete sequence:
 Open Anaconda Prompt (miniconda3) first
@@ -410,6 +420,7 @@ python scripts\download_assets.py
 jupyter lab
 ```
 
+---
 
 ## 🧩 Troubleshooting
 
