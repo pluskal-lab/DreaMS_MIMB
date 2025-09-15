@@ -325,7 +325,7 @@ jupyter lab
 	
 2.	Navigate to the folder where you want the project. For example:    
 
-	```bash 
+	```bash
 	 cd C:\Users\CODE 
 	```  
 
