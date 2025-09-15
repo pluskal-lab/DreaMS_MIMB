@@ -104,7 +104,6 @@ If you see an error, install Miniconda first.
 
 1. Open your terminal  
    - On Windows: Open the Anaconda Prompt from the Start Menu (search for “Anaconda Prompt” and click it).  
-     **TODO:** Add screenshot of opening Anaconda Prompt  
    - On macOS/Linux: Open your Terminal application from the Applications folder or system menu.
 2. Navigate to the folder where you want this project. For example, to use your Documents folder:
 
@@ -232,7 +231,7 @@ jupyter notebook
 - This will also open a new tab in your browser, but with a simpler interface.
 - Find and open the notebooks folder, then open the first notebook.
 
-  **TODO:** Add screenshot or note where this command is run: always in the terminal!
+
 
 >  **Tip:**  
 > Both JupyterLab and the classic notebook work the same way for this tutorial, choose the one you like best!  
@@ -268,8 +267,6 @@ Jupyter notebooks are interactive documents that combine code, text, and visuali
 
 > **Tip:** If you're new to Jupyter, check the top menu for a ▶️ **Run** button, it's a quick way to execute the selected cell.
 
-
-- **TODO:** Add screenshot of notebook with cells, and highlight the Run button
 
 ---
 
