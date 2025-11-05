@@ -419,3 +419,6 @@ docker-compose.override.yml
 *.pod
 *.pid
 
+# other projects
+notebooks/independent_projects/
+
